@@ -8,6 +8,7 @@ fi
 # Oh My Zsh
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
+#ZSH_THEME="af-magic"
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 
@@ -18,7 +19,7 @@ source $ZSH/oh-my-zsh.sh
 alias ll="ls -lah"
 alias vim="nvim"
 alias humble="python3 $HOME/tools/humble/humble.py"
-alias testssl="bash $HOME/tools/testssl.sh/testssl.sh"
+alias testssl.sh="bash $HOME/tools/testssl.sh/testssl.sh"
 alias webroot="cd /var/www/html"
 
 
@@ -53,7 +54,7 @@ path() { echo -e ${PATH//:/\\n}; }
 cekip() { curl -s ipconfig.io; }
 
 # PATH
-export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+export PATH="$HOME/development/dotfiles/bin:$HOME/.local/bin:$PATH"
 export PATH="/usr/local/go/bin:$HOME/go/bin:$HOME/.pdtm/go/bin:$PATH"
 export PATH="$HOME/.gems/bin:$PATH"
 export PATH="$HOME/.opencode/bin:$PATH"
