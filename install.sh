@@ -52,7 +52,6 @@ link "$DOTFILES_DIR/nvim/lua/config/options.lua" "$HOME/.config/nvim/lua/config/
 mkdir -p "$HOME/.config/nvim/lua/lua/plugins"
 link "$DOTFILES_DIR/nvim/lua/lua/plugins/all-themes.lua" "$HOME/.config/nvim/lua/lua/plugins/all-themes.lua"
 link "$DOTFILES_DIR/nvim/lua/lua/plugins/disable-news-alert.lua" "$HOME/.config/nvim/lua/lua/plugins/disable-news-alert.lua"
-link "$DOTFILES_DIR/nvim/lua/lua/plugins/omakasui-theme-hotreload.lua" "$HOME/.config/nvim/lua/lua/plugins/omakasui-theme-hotreload.lua"
 link "$DOTFILES_DIR/nvim/lua/lua/plugins/snacks-animated-scrolling-off.lua" "$HOME/.config/nvim/lua/lua/plugins/snacks-animated-scrolling-off.lua"
 mkdir -p "$HOME/.config/nvim/plugin/after"
 link "$DOTFILES_DIR/nvim/plugin/after/transparency.lua" "$HOME/.config/nvim/plugin/after/transparency.lua"
@@ -63,10 +62,11 @@ link "$DOTFILES_DIR/git/.gitconfig" "$HOME/.gitconfig"
 
 # Bin scripts
 echo "[bin]"
-mkdir -p "$HOME/bin"
-link "$DOTFILES_DIR/bin/openapi-checker.sh" "$HOME/bin/openapi-checker.sh"
-link "$DOTFILES_DIR/bin/googleapicheck" "$HOME/bin/googleapicheck"
-link "$DOTFILES_DIR/bin/basic-recon.sh" "$HOME/bin/basic-recon.sh"
+mkdir -p "$HOME/.local/bin"
+link "$DOTFILES_DIR/bin/openapi-checker.sh" "$HOME/.local/bin/openapi-checker.sh"
+link "$DOTFILES_DIR/bin/googleapicheck" "$HOME/.local/bin/googleapicheck"
+link "$DOTFILES_DIR/bin/basic-recon.sh" "$HOME/.local/bin/basic-recon.sh"
+link "$DOTFILES_DIR/bin/memu-connect.sh" "$HOME/.local/bin/memu-connect.sh"
 
 # GTK (Nemo file manager)
 echo "[gtk]"
@@ -82,15 +82,6 @@ if [ -f "$HOME/.config/btop/btop.conf" ]; then
     echo "  set color_theme = serialchiller in btop.conf"
 fi
 
-# Omakub theme
-echo "[omakub]"
-if [ -d "$HOME/.config/omakub/themes" ]; then
-    link "$DOTFILES_DIR/omakub/themes/serialchiller" "$HOME/.config/omakub/themes/serialchiller"
-    echo "  apply with: omakub theme set serialchiller"
-else
-    echo "  omakub not found, skipped"
-fi
-
 # Macchina
 echo "[macchina]"
 if command -v macchina >/dev/null 2>&1; then
@@ -104,5 +95,5 @@ fi
 echo ""
 echo "Done. Restart your shell to apply changes."
 echo ""
-echo "Make sure ~/bin is in your PATH:"
+echo "Make sure ~/.local/bin is in your PATH:"
 echo "  export PATH=\"\$HOME/bin:\$PATH\""

@@ -7,6 +7,7 @@ usage:
 import argparse
 import json
 import sys
+import time
 import urllib.request
 import urllib.error
 from concurrent.futures import ThreadPoolExecutor
@@ -88,6 +89,30 @@ def clean_msg(s, limit=90):
     return " ".join(s.split())[:limit]
 
 
+def slug(name):
+    # "Maps Geocoding" -> "maps-geocoding", "Drive v3 (public files)" -> "drive-v3"
+    import re
+    s = name.split("(")[0].strip().lower()
+    s = re.sub(r"[^a-z0-9]+", "-", s)
+    return s.strip("-")
+
+
+def human_status(flag, detail):
+    # sqlmap-style short status
+    if flag == "VULN":
+        return "Valid"
+    if flag == "INVALID":
+        return "Invalid"
+    if flag == "VALID":
+        # valid key tapi API restricted/disabled -> ga bisa dieksploit
+        return "not vuln"
+    if flag == "DENIED":
+        return "Denied"
+    if flag == "ERR":
+        return "Error"
+    return "not vuln"
+
+
 def classify(name, url, method, body, is_binary, key):
     full_url = url.replace("{key}", key)
     data = body.encode() if body else None
@@ -141,58 +166,65 @@ def classify(name, url, method, body, is_binary, key):
         return name, "ERR", str(e)[:120], full_url
 
 
+def ts():
+    return time.strftime("%H:%M:%S")
+
+
+def day():
+    return time.strftime("%Y-%m-%d")
+
+
+def log(level, msg, color=""):
+    C = "\033[0m" if color else ""
+    print(f"{color}[{ts()}] [{level}]{C} {msg}", flush=True)
+
+
 def check_key(key):
     masked = key[:8] + "*" * (len(key) - 12) + key[-4:]
-    results = []
-    with ThreadPoolExecutor(max_workers=8) as ex:
-        futs = [ex.submit(classify, *ep, key) for ep in ENDPOINTS]
-        results = [f.result() for f in futs]
 
-    vulns = [r for r in results if r[1] == "VULN"]
-    others = [r for r in results if r[1] != "VULN"]
+    C = "\033[0m"
+    G = "\033[92m"   # green  - valid/vuln
+    Y = "\033[93m"   # yellow - denied
+    R = "\033[91m"   # red    - invalid/error
+    D = "\033[90m"   # dim    - not vuln
+    B = "\033[1m"    # bold
 
-    print(f"\n{'=' * 62}")
-    print(f"  Google API Key Checker")
-    print(f"  key: {masked}  ({len(key)} chars, {len(ENDPOINTS)} endpoints)")
-    print(f"{'=' * 62}\n")
+    counts = {"Valid": 0, "not vuln": 0, "Denied": 0, "Invalid": 0, "Error": 0}
 
-    if vulns:
-        print(f"  VULNERABLE ({len(vulns)})\n  {'-' * 58}")
-        for name, flag, detail, url in vulns:
-            print(f"  \033[92m[+]\033[0m {name}  \033[90m({detail})\033[0m")
-            print(f"      {url}")
-        print()
+    print()
+    print(f"{B}[*] starting @ {ts()} /{day()}/{C}\n")
+    log("INFO", f"key {B}{masked}{C}  ({len(key)} chars, {len(ENDPOINTS)} endpoints)")
 
-    if others:
-        print(f"  NOT VULNERABLE ({len(others)})\n  {'-' * 58}")
-        for name, flag, detail, url in others:
-            if flag == "INVALID":
-                mark, note = "\033[90m[-]\033[0m", "key invalid"
-            elif flag == "VALID":
-                mark, note = "\033[93m[~]\033[0m", "valid, restricted/disabled"
-            else:
-                mark, note = "\033[90m[ ]\033[0m", clean_note(detail)
-            print(f"  {mark} {name:<32} {note}")
-        print()
+    for ep in ENDPOINTS:
+        name = ep[0]
+        slug_name = slug(name)
+        log("INFO", f"testing '{slug_name}'")
+        _name, flag, detail, url = classify(*ep, key)
+        status = human_status(flag, detail)
+        counts[status] = counts.get(status, 0) + 1
+        if status == "Valid":
+            log("VULN", f"'{slug_name}' is vulnerable", G)
+            print(f"       {D}{url}{C}", flush=True)
+        elif status == "Denied":
+            log("WARNING", f"'{slug_name}' denied ({detail})", Y)
+        elif status == "Invalid":
+            log("CRITICAL", f"'{slug_name}' key invalid", R)
+        elif status == "Error":
+            log("ERROR", f"'{slug_name}' {detail}", R)
+        else:
+            log("INFO", f"'{slug_name}' not vulnerable", D)
 
-    print(f"{'=' * 62}")
-    if vulns:
-        print(f"  \033[92m{len(vulns)} vulnerable API(s)\033[0m — URLs di atas siap dipake sebagai evidence")
-    else:
-        print(f"  0 vulnerable APIs")
-    print(f"{'=' * 62}\n")
+    print()
+    parts = []
+    if counts["Valid"]:
+        parts.append(f"{G}{counts['Valid']} valid{C}")
+    for k in ("not vuln", "Denied", "Invalid", "Error"):
+        if counts[k]:
+            parts.append(f"{D}{counts[k]} {k}{C}" if k == "not vuln" else f"{Y}{counts[k]} {k}{C}")
+    log("WARNING", f"{len(ENDPOINTS)} checked - " + ", ".join(parts), Y)
 
-
-def clean_note(s, limit=30):
-    # short human note dari error detail
-    s = s.split(" - ")[-1]
-    for word in (("not activated", "API disabled"), ("not enabled", "API disabled"),
-                 ("blocked", "blocked"), ("ADMIN_ONLY", "admin-only op"),
-                 ("not valid", "key invalid"), ("not been used", "API disabled"),
-                 ("REQUEST_DENIED", "denied")):
-        if word[0] in s:
-            return word[1]
-    return s[:limit]
+    print()
+    print(f"{B}[*] ending @ {ts()} /{day()}/{C}\n")
 
 
 def main():

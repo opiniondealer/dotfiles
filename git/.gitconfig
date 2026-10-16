@@ -1,3 +1,5 @@
 [user]
 	email = akbar@kustirama.id
 	name = abay
+[safe]
+	directory = /var/www/html/akbar.kustirama.id

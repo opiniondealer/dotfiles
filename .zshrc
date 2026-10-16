@@ -89,6 +89,4 @@ export ANDROID_HOME="$HOME/android-sdk"
 export ANDROID_SDK_ROOT="$HOME/android-sdk"
 export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin"
 
-# To customize prompt, run `p10k configure` or edit ~/development/dotfiles/zsh/.p10k.zsh.
-[[ ! -f ~/development/dotfiles/zsh/.p10k.zsh ]] || source ~/development/dotfiles/zsh/.p10k.zsh
 export PATH="$HOME/apps/macchina/target/release:$PATH"
