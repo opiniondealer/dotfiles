@@ -1,0 +1,357 @@
+* {
+    border: none;
+    border-radius: 0px;
+    font-family: "JetBrainsMono Nerd Font";
+    font-weight: bold;
+    font-size: 13px;
+    min-height: 21px;
+}
+
+/* paksa semua label pake Nerd Font (biar glyph jalan) */
+label,
+button,
+#cpu, #memory, #clock, #network, #bluetooth, #pulseaudio,
+#battery, #backlight, #idle_inhibitor, #custom-power, #custom-shortcuts, #tray, tooltip label {
+    font-family: "JetBrainsMono Nerd Font";
+}
+
+@import "themes/theme.css";
+
+window#waybar {
+    background: @bar-bg;
+    border: 1px solid @sc-border;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+}
+
+/* Tooltip — palette Serialchiller (VSCode Dark) */
+tooltip {
+    background: @sc-popover;
+    border: 1px solid @sc-border;
+    border-radius: 8px;
+}
+tooltip label {
+    color: @main-fg;
+    padding: 4px;
+    font-weight: normal;
+}
+
+/* Hover: disabled (no background change) */
+
+#workspaces button {
+    box-shadow: none;
+	text-shadow: none;
+    padding: 0px;
+    border-radius: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-right: 0px;
+    color: @sc-primary;
+    animation: ws_normal 20s ease-in-out 1;
+}
+
+#workspaces button.persistent{
+    color: @sc-card-fg;
+}
+
+#workspaces button.active {
+    /* background: #2B2F38; */
+    color: @sc-card-fg;
+    /* margin-left: 1px; 
+    padding-left: 4px;
+    padding-right: 8px;
+    margin-right: 1px; */
+    animation: ws_active 20s ease-in-out 1;
+    /* transition: all 0.4s cubic-bezier(.55,-0.68,.48,1.682); */
+}
+
+#workspaces button.persistent:nth-child(2){
+    color: @sc-primary;
+}
+
+#workspaces button.persistent:nth-child(3){
+    color: @sc-chart2;
+}
+
+#workspaces button:hover {
+    /* background: @wb-hvr-bg; */
+    color: @sc-muted-fg;
+    animation: ws_hover 20s ease-in-out 1;
+    transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+#taskbar button {
+    box-shadow: none;
+	text-shadow: none;
+    padding: 0px;
+    border-radius: 8px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 0px;
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-right: 0px;
+    color: @wb-color;
+    animation: tb_normal 20s ease-in-out 1;
+}
+
+#taskbar button.active {
+    background: @wb-act-bg;
+    color: @wb-act-color;
+    margin-left: 2px;
+    padding-left: 11px;
+    padding-right: 11px;
+    margin-right: 2px;
+    animation: tb_active 20s ease-in-out 1;
+    transition: all 0.4s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+#taskbar button:hover {
+    background: @wb-hvr-bg;
+    color: @wb-hvr-color;
+    animation: tb_hover 20s ease-in-out 1;
+    transition: all 0.3s cubic-bezier(.55,-0.68,.48,1.682);
+}
+
+#custom-weather.severe,
+#custom-weather.sunnyDay,
+#custom-weather.clearNight,
+#custom-weather.cloudyFoggyDay,
+#custom-weather.cloudyFoggyNight,
+#custom-weather.rainyDay,
+#custom-weather.rainyNight,
+#custom-weather.showyIcyDay,
+#custom-weather.snowyIcyNight,
+#custom-weather.default,
+#custom-power,
+#backlight,
+#battery,
+#bluetooth,
+#clock,
+#cpu,
+#idle_inhibitor,
+#language,
+#memory,
+#mpris,
+#network,
+#custom-power,
+#pulseaudio,
+#taskbar,
+#window,
+#workspaces,
+#custom-l_end,
+#custom-r_end {
+    color: @main-fg;
+    background: transparent;
+    opacity: 1;
+    margin: 6px 0px 6px 0px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+#tray menu * {
+  color: @main-fg;
+  background: @sc-popover;
+}
+#tray {
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 6px 0px 6px 0px;
+  min-width: 0;
+}
+#tray widget {
+  margin: 0 2px;
+}
+#tray > .passive {
+  -gtk-icon-effect: dim;
+}
+#tray > .needs-attention {
+  -gtk-icon-effect: highlight;
+}
+
+
+
+/* palette: Minimal Neutral — grayscale + aksen biru */
+#cpu,
+#memory,
+#clock,
+#network,
+#bluetooth,
+#pulseaudio,
+#battery,
+#backlight,
+#idle_inhibitor {
+    color: @main-fg;
+}
+
+/* aksen warna: cpu + network biru muda, memory/battery putih */
+#cpu{
+    color: @sc-chart1;
+}
+#network{
+    color: @sc-chart1;
+}
+#memory{
+    color: @main-fg;
+}
+#battery{
+    color: @sc-chart1;
+}
+#battery.charging,
+#battery.plugged{
+    color: @sc-chart1;
+}
+#battery.warning:not(.charging){
+    color: #e0c07b;
+}
+#battery.critical:not(.charging){
+    color: @sc-destructive;
+}
+
+#custom-shortcuts{
+    color: @sc-muted-fg;
+    font-size: 15px;
+    padding-left: 2px;
+    padding-right: 6px;
+}
+#custom-shortcuts:hover{
+    color: @sc-chart1;
+}
+#custom-power{
+    color: @sc-bg;
+    background: @sc-primary;
+    padding-right: 12px;
+    padding-left: 12px;
+    font-size: 15px;
+    border-radius: 5px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    margin-right: 4px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+#workspaces,
+#taskbar {
+    padding: 0px;
+}
+
+#custom-r_end {
+    border-radius: 0px 5px 5px 0px;
+    margin-right: 3px;
+    margin-left: 0px;
+    padding: 0px;
+    min-width: 0px;
+}
+
+#custom-l_end {
+    border-radius: 5px 0px 0px 5px;
+    margin-left: 3px;
+    margin-right: 0px;
+    padding: 0px;
+    min-width: 0px;
+}
+
+/* l_end paling awal — kasih ruang dari tepi kiri */
+#custom-l_end:first-child {
+    margin-left: 0px;
+}
+
+/* pill grouping: hapus celah antar module dalam satu pill */
+#custom-shortcuts,
+#network,
+#bluetooth,
+#pulseaudio,
+#cpu,
+#memory,
+#battery,
+#backlight {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+#custom-shortcuts {
+    padding-left: 12px;
+    padding-right: 8px;
+}
+#network { padding-left: 4px; padding-right: 8px; }
+#bluetooth { padding-left: 4px; padding-right: 8px; }
+#pulseaudio { padding-left: 4px; padding-right: 12px; }
+#cpu { padding-left: 12px; padding-right: 8px; }
+#memory { padding-left: 4px; padding-right: 8px; }
+#battery { padding-left: 4px; padding-right: 8px; }
+#backlight { padding-left: 4px; padding-right: 12px; }
+
+/* satu pill: hilangkan border pemisah antar module */
+#custom-shortcuts,
+#network,
+#bluetooth,
+#pulseaudio {
+    border: none;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+/* l_end/r_end: benar-benar invisible, cuma penanda grup */
+#custom-l_end,
+#custom-r_end {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    min-width: 0px;
+    padding: 0px;
+}
+
+/* ===== FINAL SPACING OVERRIDE ===== */
+#custom-shortcuts { padding-left: 10px; padding-right: 6px; margin: 6px 0 6px 0; }
+#network { padding-left: 8px; padding-right: 6px; margin: 6px 0 6px 0; }
+#bluetooth { padding-left: 4px; padding-right: 8px; margin: 6px 0 6px 0; }
+#pulseaudio { padding-left: 2px; padding-right: 12px; margin: 6px 0 6px 0; }
+#cpu { padding-left: 16px; padding-right: 6px; margin: 6px 0 6px 0; }
+#memory { padding-left: 6px; padding-right: 6px; margin: 6px 0 6px 0; }
+#battery { padding-left: 6px; padding-right: 6px; margin: 6px 0 6px 0; }
+#backlight { padding-left: 6px; padding-right: 6px; margin: 6px 0 6px 0; }
+
+/* ===== notification + tray ===== */
+/* notif: ujung kanan pill battery */
+#custom-notification {
+    font-family: "JetBrainsMono Nerd Font";
+    color: @main-fg;
+    padding-left: 6px;
+    padding-right: 12px;
+    margin: 6px 0 6px 0;
+}
+
+/* tray: pill sendiri di paling kiri */
+#tray {
+    padding-left: 10px;
+    padding-right: 10px;
+    margin: 6px 0 6px 0;
+    min-width: 0;
+}
+
+#tray widget {
+    margin: 0 3px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+}
+
+/* bluetooth: biru kalau nyala/connected */
+#bluetooth{
+    color: @sc-muted-fg;
+}
+#bluetooth.connected,
+#bluetooth.on{
+    color: @sc-chart1;
+}
+#bluetooth.disabled,
+#bluetooth.off{
+    color: @sc-muted-fg;
+}

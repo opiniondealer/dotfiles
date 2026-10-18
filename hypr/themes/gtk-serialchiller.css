@@ -1,0 +1,22 @@
+@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");
+
+@define-color theme_bg_color #171717;
+@define-color theme_fg_color #fafafa;
+@define-color theme_base_color #0e0e0e;
+@define-color theme_text_color #fafafa;
+@define-color theme_selected_bg_color #404040;
+@define-color theme_selected_fg_color #fafafa;
+@define-color borders #262626;
+
+window, .background { background-color: #171717; color: #fafafa; }
+label { color: #fafafa; }
+scale trough { background-color: #262626; border-radius: 4px; min-height: 6px; }
+scale highlight { background-color: #91c5ff; border-radius: 4px; }
+scale slider { background-color: #fafafa; border-radius: 50%; min-width: 14px; min-height: 14px; }
+button { background-color: #262626; color: #fafafa; border: 1px solid #404040; border-radius: 6px; padding: 6px 18px; }
+button:hover { background-color: #404040; }
+
+/* font */
+* {
+    font-family: "Ubuntu Mono", monospace;
+}

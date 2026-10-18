@@ -1,0 +1,86 @@
+/* wofi style — Minimal Neutral (match waybar palette) */
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 13px;
+}
+
+window {
+    margin: 0px;
+    border: 1px solid #262626;
+    border-radius: 10px;
+    background-color: rgba(23, 23, 23, 0.97);
+}
+
+#outer-box {
+    margin: 0px;
+    padding: 12px;
+    background-color: transparent;
+}
+
+#input {
+    margin: 0px 0px 10px 0px;
+    padding: 8px 10px;
+    border: 1px solid #262626;
+    border-radius: 6px;
+    background-color: #0e0e0e;
+    color: #fafafa;
+}
+
+#input:focus {
+    border: 1px solid #404040;
+}
+
+#scroll {
+    margin: 0px;
+    border: none;
+    background-color: transparent;
+}
+
+#inner-box {
+    margin: 0px;
+    border: none;
+    background-color: transparent;
+}
+
+#entry {
+    margin: 1px 0px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background-color: transparent;
+    color: #fafafa;
+}
+
+#entry:hover {
+    background-color: #262626;
+}
+
+#entry:selected {
+    background-color: #404040;
+    color: #fafafa;
+}
+
+#text {
+    margin: 0px;
+    color: #fafafa;
+}
+
+#text:selected {
+    color: #fafafa;
+}
+
+/* app icons (drun mode) */
+#img {
+    margin-right: 8px;
+    min-width: 22px;
+    min-height: 22px;
+    padding: 0px;
+}
+
+#entry {
+    padding: 5px 8px;
+}
+
+#input {
+    font-size: 14px;
+}

@@ -1,0 +1,6 @@
+width=620
+height=640
+location=center
+style=/home/abay/.config/wofi/style.css
+cache-file=/dev/null
+show-icons=false

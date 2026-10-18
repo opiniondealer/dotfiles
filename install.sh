@@ -29,7 +29,6 @@ echo ""
 # Shell
 echo "[shell]"
 link "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
-link "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
 
 # Kitty
 echo "[kitty]"
@@ -91,6 +90,47 @@ if command -v macchina >/dev/null 2>&1; then
 else
     echo "  macchina not found, skipped"
 fi
+
+# Hyprland
+echo "[hyprland]"
+mkdir -p "$HOME/.config/hypr/scripts"
+link "$DOTFILES_DIR/hypr/hyprland.conf" "$HOME/.config/hypr/hyprland.conf"
+link "$DOTFILES_DIR/hypr/monitors.conf" "$HOME/.config/hypr/monitors.conf"
+link "$DOTFILES_DIR/hypr/workspaces.conf" "$HOME/.config/hypr/workspaces.conf"
+link "$DOTFILES_DIR/hypr/hyprpaper.conf" "$HOME/.config/hypr/hyprpaper.conf"
+link "$DOTFILES_DIR/hypr/hypridle.conf" "$HOME/.config/hypr/hypridle.conf"
+link "$DOTFILES_DIR/hypr/scripts/maxsize.sh" "$HOME/.config/hypr/scripts/maxsize.sh"
+
+# Hyprland helper scripts
+echo "[hyprdots]"
+mkdir -p "$HOME/.config/hyprdots/scripts"
+for s in audio-switch auto-workspace brightness-slider globalcontrol hypr-monitor-listener shortcuts systemupdate wallpaper wifi-menu; do
+    link "$DOTFILES_DIR/hyprdots/scripts/$s.sh" "$HOME/.config/hyprdots/scripts/$s.sh"
+done
+
+# Waybar
+echo "[waybar]"
+mkdir -p "$HOME/.config/waybar/themes"
+link "$DOTFILES_DIR/waybar/config" "$HOME/.config/waybar/config"
+link "$DOTFILES_DIR/waybar/style.css" "$HOME/.config/waybar/style.css"
+link "$DOTFILES_DIR/waybar/themes/Serialchiller.css" "$HOME/.config/waybar/themes/Serialchiller.css"
+link "$DOTFILES_DIR/waybar/themes/theme.css" "$HOME/.config/waybar/themes/theme.css"
+
+# Wofi
+echo "[wofi]"
+link "$DOTFILES_DIR/wofi/config" "$HOME/.config/wofi/config"
+link "$DOTFILES_DIR/wofi/drun.conf" "$HOME/.config/wofi/drun.conf"
+link "$DOTFILES_DIR/wofi/style.css" "$HOME/.config/wofi/style.css"
+
+# SwayNC
+echo "[swaync]"
+link "$DOTFILES_DIR/swaync/config.json" "$HOME/.config/swaync/config.json"
+link "$DOTFILES_DIR/swaync/style.css" "$HOME/.config/swaync/style.css"
+
+# GTK theme for yad (Serialchiller)
+echo "[gtk-theme]"
+mkdir -p "$HOME/.themes/Serialchiller/gtk-3.0"
+link "$DOTFILES_DIR/hypr/themes/gtk-serialchiller.css" "$HOME/.themes/Serialchiller/gtk-3.0/gtk.css"
 
 echo ""
 echo "Done. Restart your shell to apply changes."

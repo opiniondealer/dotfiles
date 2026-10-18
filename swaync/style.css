@@ -1,0 +1,125 @@
+/* swaync — Minimal Neutral (match waybar) */
+
+* {
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 13px;
+}
+
+.control-center {
+    background: rgba(23, 23, 23, 0.97);
+    border: 1px solid #262626;
+    border-radius: 10px;
+    color: #fafafa;
+    margin: 0px;
+}
+
+/* paksa lebar panel, jangan fullscreen */
+.control-center {
+    min-width: 400px;
+    min-height: 700px;
+}
+
+.control-center-list-window,
+window.control-center {
+    min-width: 400px;
+}
+
+/* backdrop jangan nutupin layar */
+.blank-window {
+    background: transparent;
+}
+
+.control-center .notification-row .notification-background {
+    background: #0e0e0e;
+    border: 1px solid #262626;
+    border-radius: 8px;
+    margin: 6px 8px;
+    padding: 0px;
+}
+
+.notification-row .notification-background .notification {
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.notification .notification-content {
+    color: #fafafa;
+}
+
+.notification .notification-content .text-box .summary {
+    color: #fafafa;
+    font-weight: bold;
+}
+
+.notification .notification-content .text-box .body {
+    color: #a1a1a1;
+}
+
+.notification .notification-content .time {
+    color: #a1a1a1;
+}
+
+.notification .close-button {
+    background: #262626;
+    color: #fafafa;
+    border-radius: 50%;
+    min-width: 20px;
+    min-height: 20px;
+}
+
+.notification .close-button:hover {
+    background: #ff6467;
+    color: #fafafa;
+}
+
+.widget-title {
+    color: #fafafa;
+    margin: 8px;
+    font-weight: bold;
+}
+
+.widget-title button {
+    background: #262626;
+    color: #fafafa;
+    border: 1px solid #404040;
+    border-radius: 6px;
+    padding: 4px 10px;
+}
+
+.widget-title button:hover {
+    background: #404040;
+}
+
+.widget-dnd {
+    color: #fafafa;
+    margin: 8px;
+}
+
+.widget-dnd switch {
+    background: #262626;
+    border-radius: 10px;
+}
+
+.widget-dnd switch:checked {
+    background: #91c5ff;
+}
+
+.widget-dnd label {
+    color: #a1a1a1;
+}
+
+/* popup notifikasi */
+.notification {
+    background: rgba(23, 23, 23, 0.97);
+    border: 1px solid #262626;
+    border-radius: 8px;
+    color: #fafafa;
+}
+
+.control-center-list {
+    background: transparent;
+}
+
+.control-center-list-placeholder {
+    color: #a1a1a1;
+}

@@ -1,0 +1,218 @@
+// Waybar config 
+{
+    "layer": "top",
+    "position": "top",
+    "height": 42,
+    "exclusive": true,
+    "passthrough": false,
+    "gtk-layer-shell": true,
+    "margin-top": 8,
+    "margin-left": 8,
+    "margin-right": 8,
+
+    "modules-left": [
+        "custom/l_end", "hyprland/workspaces", "custom/r_end"
+    ],
+    "modules-center": [
+        "custom/l_end", "clock", "custom/r_end"
+    ],
+    "modules-right": [
+        "custom/l_end", "tray", "custom/r_end",
+        "custom/l_end", "custom/shortcuts", "network", "bluetooth", "pulseaudio", "custom/r_end",
+        "custom/l_end", "cpu", "memory", "battery", "backlight", "custom/notification", "custom/r_end",
+        "custom/power"
+    ],
+
+    // ---- Power menu (wlogout) ----
+    "custom/power": {
+        "format": "󰐥",
+        "tooltip": false,
+        "on-click": "wlogout"
+    },
+
+    // ---- Workspaces ----
+    "hyprland/workspaces": {
+        "format": "{id}",
+        "format-icons": {
+            "active": "󱨇",
+            "default": "󰧟",
+            "empty": "󰧟"
+        },
+        "disable-scroll": true,
+        "all-outputs": true,
+        "active-only": false,
+        "on-click": "activate"
+    },
+
+    // ---- Clock ----
+    "clock": {
+        "format": "{:%H:%M 󰃭 %d·%m·%y}",
+        "tooltip-format": "<tt>{calendar}</tt>",
+        "calendar": {
+            "mode": "month",
+            "mode-mon-col": 3,
+            "weeks-pos": "right",
+            "on-scroll": 1,
+            "format": {
+                "months": "<span color='#91c5ff'><b>{}</b></span>",
+                "days": "<span color='#a1a1a1'>{}</span>",
+                "weekdays": "<span color='#fafafa'><b>{}</b></span>",
+                "today": "<span color='#91c5ff'><b>{}</b></span>"
+            }
+        },
+        "actions": {
+            "on-click-right": "mode",
+            "on-scroll-up": "shift_up",
+            "on-scroll-down": "shift_down"
+        }
+    },
+
+    // ---- Updates (Debian) ----
+    "custom/updates": {
+        "exec": "$HOME/.config/hyprdots/scripts/systemupdate.sh",
+        "return-type": "json",
+        "format": "󰆦 {}",
+        "on-click": "$HOME/.config/hyprdots/scripts/systemupdate.sh up",
+        "interval": 3600,
+        "tooltip": true
+    },
+
+    // ---- Shortcut cheatsheet ----
+    "custom/shortcuts": {
+        "format": "󰌌",
+        "interval": "once",
+        "tooltip": "Keybind Hyprland (klik)",
+        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/shortcuts.sh"
+    },
+
+    // ---- Notification (swaync) ----
+    "custom/notification": {
+        "tooltip": false,
+        "format": "{icon}",
+        "format-icons": {
+            "notification": "󰂚<span foreground='#ff6467'><sup>●</sup></span>",
+            "none": "󰂚",
+            "dnd-notification": "󰂛<span foreground='#ff6467'><sup>●</sup></span>",
+            "dnd-none": "󰂛",
+            "inhibited-notification": "󰂚<span foreground='#ff6467'><sup>●</sup></span>",
+            "inhibited-none": "󰂚",
+            "dnd-inhibited-notification": "󰂛<span foreground='#ff6467'><sup>●</sup></span>",
+            "dnd-inhibited-none": "󰂛"
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true
+    },
+
+    // ---- Tray ----
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8
+    },
+
+    // ---- Network ----
+    "network": {
+        "interface": "wlo1",
+        "tooltip": true,
+        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/wifi-menu.sh",
+        "on-click-right": "nm-connection-editor",
+        "format-wifi": "󰖩",
+        "format-ethernet": "󰈀",
+        "format-linked": "󰈀 {ifname}",
+        "format-disconnected": "󰖪",
+        "tooltip-format": "Network: <big><b>{essid}</b></big>\nSignal: <b>{signaldBm}dBm ({signalStrength}%)</b>\nInterface: <b>{ifname}</b>\nIP: <b>{ipaddr}/{cidr}</b>",
+        "interval": 2
+    },
+
+    // ---- Bluetooth ----
+    "bluetooth": {
+        "format": "",
+        "on-click": "blueman-manager",
+        "format-connected": "",
+        "format-disabled": "",
+        "format-off": "",
+        "tooltip-format": "{controller_alias}",
+        "tooltip-format-connected": "{controller_alias}\n{num_connections} device terhubung\n\n{device_enumerate}"
+    },
+
+    // ---- Audio ----
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟",
+        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/audio-switch.sh",
+        "tooltip-format": "{icon} {desc} // {volume}%",
+        "scroll-step": 5,
+        "format-icons": {
+            "headphone": "󰋋",
+            "hands-free": "󰋎",
+            "headset": "󰋎",
+            "phone": "󰏲",
+            "portable": "󰏲",
+            "car": "󰄋",
+            "default": ["󰕿", "󰖀", "󰕾"]
+        }
+    },
+
+    // ---- CPU ----
+    "cpu": {
+        "interval": 10,
+        "format": "󰻠 {usage}%",
+        "format-alt": "{icon0}{icon1}{icon2}{icon3}",
+        "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"],
+        "tooltip": true
+    },
+
+    // ---- Memory ----
+    "memory": {
+        "interval": 30,
+        "format": "󰘚 {used:0.1f}G",
+        "format-m": "󰘚 {used:0.1f}G",
+        "format-h": "󰘚 {used:0.1f}G",
+        "format-c": "󰘚 {used:0.1f}G",
+        "tooltip": true,
+        "tooltip-format": "󰾆 {percentage}%\n󰍛 {used:0.1f}GB / {total:0.1f}GB"
+    },
+
+    // ---- Battery ----
+    "battery": {
+        "states": {
+            "good": 95,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
+        "format-plugged": "󰂄 {capacity}%",
+        "format-alt": "{time} {icon}",
+        "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
+    },
+
+    // ---- Backlight ----
+    "backlight": {
+        "format": "{icon} {percent}%",
+        "format-icons": ["󰃞", "󰃟", "󰃠"],
+        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/brightness-slider.sh",
+        "on-scroll-up": "brightnessctl -d intel_backlight set 5%+",
+        "on-scroll-down": "brightnessctl -d intel_backlight set 5%-",
+        "tooltip": true,
+        "tooltip-format": "Brightness {percent}%\nKlik: slider · Scroll: ±5%",
+        "min-length": 6
+    },
+
+    // ---- Idle inhibitor ----
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "󰥔",
+            "deactivated": "󰒲"
+        }
+    },
+
+    // ---- Padding modules (trik bikin pill terpisah) ----
+    "custom/l_end": { "format": " ", "interval": "once", "tooltip": false },
+    "custom/r_end": { "format": " ", "interval": "once", "tooltip": false },
+    "custom/padd":  { "format": " ", "interval": "once", "tooltip": false }
+}

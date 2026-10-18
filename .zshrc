@@ -1,27 +1,28 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
 # Oh My Zsh
 export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="powerlevel10k/powerlevel10k"
-#ZSH_THEME="af-magic"
+ZSH_THEME=""   # prompt custom di bawah
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 source $ZSH/oh-my-zsh.sh
 
-# Powerlevel10k
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+setopt prompt_subst
+
+# git info (branch + dirty) — truecolor, palette Minimal Neutral
+ZSH_THEME_GIT_PROMPT_PREFIX="%F{#a1a1a1}("
+ZSH_THEME_GIT_PROMPT_SUFFIX="%F{#a1a1a1})"
+ZSH_THEME_GIT_PROMPT_DIRTY=" %F{#ff6467}*"
+ZSH_THEME_GIT_PROMPT_CLEAN=""
+ZSH_THEME_GIT_PROMPT_BRANCH="%F{#91c5ff}"
+
+PROMPT='%F{#fafafa}%n@%m:%~$(git_prompt_info)%(!.#.$)%f '
+
+RPROMPT='%(?..%F{#ff6467}[%?]%f )%F{#a1a1a1}%*%f'
 
 # Aliases
 alias ll="ls -lah"
-alias vim="nvim"
 alias humble="python3 $HOME/tools/humble/humble.py"
 alias testssl.sh="bash $HOME/tools/testssl.sh/testssl.sh"
 alias webroot="cd /var/www/html"
-
+alias vim="$HOME/apps/nvim/bin/nvim"
 
 # Navigation
 alias ..="cd .."

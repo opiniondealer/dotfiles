@@ -1,0 +1,34 @@
+/* Serialchiller palette — "Minimal Neutral" (tweakcn), dark mode
+   bg #171717 · card #0e0e0e · fg #fafafa · border #262626
+   accent blue: chart-1 #91c5ff → chart-5 #1f3fad */
+
+@define-color bar-bg rgba(23, 23, 23, 0.70);
+
+@define-color main-bg #0e0e0e;
+@define-color main-fg #fafafa;
+
+@define-color wb-act-bg #404040;
+@define-color wb-act-fg #fafafa;
+
+@define-color wb-hvr-bg #262626;
+@define-color wb-hvr-fg #fafafa;
+
+/* extra tokens */
+@define-color sc-bg #171717;
+@define-color sc-card #0e0e0e;
+@define-color sc-card-fg #fafafa;
+@define-color sc-popover #171717;
+@define-color sc-muted #262626;
+@define-color sc-muted-fg #a1a1a1;
+@define-color sc-primary #e5e5e5;
+@define-color sc-accent #404040;
+@define-color sc-border #262626;
+@define-color sc-input #262626;
+@define-color sc-destructive #ff6467;
+@define-color sc-chart1 #91c5ff;
+@define-color sc-chart2 #3a81f6;
+@define-color sc-chart3 #2563ef;
+@define-color sc-chart4 #1a4eda;
+@define-color sc-chart5 #1f3fad;
+@define-color sc-sidebar #262626;
+@define-color sc-ring #737373;
