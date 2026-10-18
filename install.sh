@@ -33,7 +33,6 @@ link "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
 # Kitty
 echo "[kitty]"
 link "$DOTFILES_DIR/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
-link "$DOTFILES_DIR/kitty/current-theme.conf" "$HOME/.config/kitty/current-theme.conf"
 mkdir -p "$HOME/.config/kitty/themes"
 link "$DOTFILES_DIR/kitty/serialchiller.conf" "$HOME/.config/kitty/themes/serialchiller.conf"
 
