@@ -52,7 +52,7 @@ extract() {
 
 path() { echo -e ${PATH//:/\\n}; }
 
-cekip() { curl -s ipconfig.io; }
+cekip() { curl -s ipinfo.io/ip; echo; }
 
 # PATH
 export PATH="$HOME/development/dotfiles/bin:$HOME/.local/bin:$PATH"
