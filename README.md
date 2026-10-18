@@ -9,7 +9,7 @@ Personal configuration files for zsh, kitty, nvim, git, btop, and macchina.
 - **kitty/** - Kitty terminal config + VSCode Dark theme, plus `serialchiller.conf` (selectable via `kitty +kitten themes`)
 - **nvim/** - Neovim config (LazyVim + lazy.nvim)
 - **git/.gitconfig** - Git config
-- **bin/** - Custom scripts (openapi-checker.sh, googleapicheck, basic-recon.sh, memu-connect.sh)
+- **bin/** - Custom scripts (openapi-checker.sh, googleapicheck, basic-recon.sh)
 - **gtk/gtk.css** - Dark theme for Nemo file manager (VSCode Dark)
 - **btop/** - btop theme "serialchiller" (VSCode Dark palette)
 - **macchina/** - Macchina system info theme "serialchiller" + default config

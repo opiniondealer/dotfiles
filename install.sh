@@ -64,7 +64,6 @@ mkdir -p "$HOME/.local/bin"
 link "$DOTFILES_DIR/bin/openapi-checker.sh" "$HOME/.local/bin/openapi-checker.sh"
 link "$DOTFILES_DIR/bin/googleapicheck" "$HOME/.local/bin/googleapicheck"
 link "$DOTFILES_DIR/bin/basic-recon.sh" "$HOME/.local/bin/basic-recon.sh"
-link "$DOTFILES_DIR/bin/memu-connect.sh" "$HOME/.local/bin/memu-connect.sh"
 
 # GTK (Nemo file manager)
 echo "[gtk]"
