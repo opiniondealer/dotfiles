@@ -32,15 +32,16 @@
 
     // ---- Workspaces ----
     "hyprland/workspaces": {
-        "format": "{id}",
+        "format": "{name}",
         "format-icons": {
             "active": "󱨇",
             "default": "󰧟",
             "empty": "󰧟"
         },
         "disable-scroll": true,
-        "all-outputs": true,
+        "all-outputs": false,
         "active-only": false,
+        "show-special": false,
         "on-click": "activate"
     },
 
