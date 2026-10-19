@@ -17,7 +17,7 @@ list_wifi() {
 }
 
 # tampilkan menu pake wofi dmenu
-choice=$(list_wifi | wofi --dmenu --insensitive --prompt "" --mesg "Pilih WiFi (signal%)" --width 520 --height 420 2>/dev/null)
+choice=$(list_wifi | wofi --dmenu --insensitive --prompt "WiFi  (signal %)" --width 520 --height 420 2>/dev/null)
 
 [ -z "$choice" ] && exit 0
 

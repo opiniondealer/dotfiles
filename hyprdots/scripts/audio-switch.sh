@@ -28,9 +28,10 @@ list_dev() {
 pick() {
     local kind="$1" section="$2" endmark="$3" label="$4"
     local choice
-    choice=$(list_dev "$section" "$endmark" | wofi --dmenu --insensitive --prompt "" \
-        --width 620 --height 420 \
-        --mesg "$label  (* = in use)" 2>/dev/null)
+    # wofi has no --mesg (rofi-only). Put the label in the prompt instead.
+    choice=$(list_dev "$section" "$endmark" | wofi --dmenu --insensitive \
+        --prompt "$label  (* = in use)" \
+        --width 620 --height 420 2>/dev/null)
     [ -z "$choice" ] && return
     local id
     id=$(echo "$choice" | awk '{print $NF}')
@@ -44,6 +45,15 @@ pick() {
 }
 
 main() {
+    # Direct mode: called from the audio panel's gear button.
+    #   audio-switch.sh sink     -> output device list only
+    #   audio-switch.sh source   -> input device list only
+    case "${1:-}" in
+        sink|output|out)   pick "Output" "Sinks" "Sources" "OUTPUT"; return ;;
+        source|input|mic)  pick "Input" "Sources" "Streams" "INPUT"; return ;;
+    esac
+
+    # No argument: show the full menu (waybar right-click).
     local mode
     mode=$(printf 'Output device   (speaker / headphone)\nInput device    (microphone)\n---\nOutput volume   (slider)\nInput volume    (slider)\n' | \
         wofi --dmenu --insensitive --prompt "" --width 460 --height 220 2>/dev/null)
@@ -56,5 +66,5 @@ main() {
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main
+    main "$@"
 fi

@@ -315,12 +315,14 @@ class Row(Gtk.Box):
         return False
 
     def _on_switch(self, _btn):
+        # Pass the channel so the picker opens the device list directly,
+        # skipping the "output/input/slider" menu.
         subprocess.Popen(
-            ["bash", "-lc", AUDIO_SWITCH],
+            ["bash", AUDIO_SWITCH, self.kind],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        GLib.timeout_add(1200, self._after_switch)
+        GLib.timeout_add(1500, self._after_switch)
 
     def _after_switch(self):
         self.refresh()
