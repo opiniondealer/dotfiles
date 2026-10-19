@@ -104,7 +104,14 @@ def fetch_tasks():
 
 
 def render(name, alpha=None):
-    label = name if alpha is None else '<span alpha="%d%%">%s</span>' % (alpha, name)
+    # alpha is a 0-100 percent from the fade loop; Pango wants an integer
+    # 0-65535 or a valid percentage, and rejects "0%". Scale to the integer
+    # range and keep a floor of 1 so every frame is valid markup.
+    if alpha is None:
+        label = name
+    else:
+        v = max(1, min(65535, int(alpha * 65535 / 100)))
+        label = '<span alpha="%d">%s</span>' % (v, name)
     return ICON + " " + label
 
 
@@ -126,7 +133,7 @@ def main():
 
         if not tasks:
             emit(
-                '<span alpha="70%%">%s no tasks</span>' % ICON,
+                '<span alpha="%d">%s no tasks</span>' % (int(70 * 65535 / 100), ICON),
                 "Nothing due today and nothing overdue",
                 "empty",
             )
