@@ -32,12 +32,12 @@
   ],
   "widget-config": {
     "title": {
-      "text": "Notifikasi",
+      "text": "Notifications",
       "clear-all-button": true,
-      "button-text": "Bersihkan"
+      "button-text": "Clear all"
     },
     "dnd": {
-      "text": "Jangan Ganggu"
+      "text": "Do Not Disturb"
     },
     "notifications": {
       "vexpand": true

@@ -47,7 +47,7 @@
 
     // ---- Clock ----
     "clock": {
-        "format": "{:%H:%M 󰃭 %d·%m·%y}",
+        "format": "{:%Y/%m/%d — %H.%M}",
         "tooltip-format": "<tt>{calendar}</tt>",
         "calendar": {
             "mode": "month",
