@@ -1,4 +1,13 @@
 /* swaync — Minimal Neutral (match waybar) */
+/* swaync always loads /etc/xdg/swaync/style.css first; that file uses
+   @cc-bg / @text-color which are undefined here, so the control center
+   renders fully transparent. Define them and force our surfaces. */
+@define-color cc-bg #171717;
+@define-color noti-bg #0e0e0e;
+@define-color noti-bg-hover #1f1f1f;
+@define-color noti-border-color #262626;
+@define-color text-color #fafafa;
+@define-color text-color-disabled #a1a1a1;
 
 * {
     font-family: "JetBrainsMono Nerd Font";
@@ -6,7 +15,7 @@
 }
 
 .control-center {
-    background: rgba(23, 23, 23, 0.97);
+    background-color: #171717;
     border: 1px solid #262626;
     border-radius: 10px;
     color: #fafafa;
@@ -26,12 +35,12 @@
     background: #0e0e0e;
     border: 1px solid #262626;
     border-radius: 8px;
-    margin: 6px 8px;
+    margin: 8px 14px;
     padding: 0px;
 }
 
 .notification-row .notification-background .notification {
-    padding: 8px;
+    padding: 14px 16px;
     border-radius: 8px;
 }
 
@@ -42,6 +51,7 @@
 .notification .notification-content .text-box .summary {
     color: #fafafa;
     font-weight: bold;
+    margin-bottom: 3px;
 }
 
 .notification .notification-content .text-box .body {
@@ -69,7 +79,7 @@
    title, the Clear all button and the notification cards line up. */
 .widget-title {
     color: #fafafa;
-    margin: 10px 8px 6px 8px;
+    margin: 18px 14px 10px 14px;
     font-weight: bold;
 }
 
@@ -78,7 +88,7 @@
     color: #fafafa;
     border: 1px solid #404040;
     border-radius: 6px;
-    padding: 4px 10px;
+    padding: 7px 14px;
 }
 
 .widget-title button:hover {
@@ -87,7 +97,7 @@
 
 .widget-dnd {
     color: #fafafa;
-    margin: 2px 8px 8px 8px;
+    margin: 4px 14px 14px 14px;
 }
 
 .widget-dnd switch {
@@ -127,7 +137,7 @@
 }
 
 .control-center .control-center-list {
-    padding: 0px 8px;
+    padding: 0px 14px;
 }
 
 .control-center .widget-title {
