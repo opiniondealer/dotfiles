@@ -100,6 +100,24 @@ def parse(text: str):
     return result
 
 
+def autoclose_on_blur(win):
+    """Close the window as soon as it loses focus (click elsewhere)."""
+
+    # Only arm auto-close once the window has actually been focused, so a
+    # launch that starts unfocused (e.g. from a terminal) does not vanish.
+    state = {"armed": False}
+
+    def _on_active(w, _pspec):
+        if w.is_active():
+            state["armed"] = True
+            return
+        if not state["armed"]:
+            return
+        w.close()
+
+    win.connect("notify::is-active", _on_active)
+
+
 class ShortcutsPanel(Gtk.Application):
     def __init__(self):
         super().__init__(application_id="dev.serialchiller.shortcutspanel")
@@ -167,6 +185,7 @@ class ShortcutsPanel(Gtk.Application):
         key.connect("key-pressed", self._on_key)
         win.add_controller(key)
 
+        autoclose_on_blur(win)
         win.present()
 
     def _on_key(self, _c, keyval, _code, _state):

@@ -161,6 +161,24 @@ def icon_for(value: int, name: str) -> str:
     return "󰃠"
 
 
+def autoclose_on_blur(win):
+    """Close the window as soon as it loses focus (click elsewhere)."""
+
+    # Only arm auto-close once the window has actually been focused, so a
+    # launch that starts unfocused (e.g. from a terminal) does not vanish.
+    state = {"armed": False}
+
+    def _on_active(w, _pspec):
+        if w.is_active():
+            state["armed"] = True
+            return
+        if not state["armed"]:
+            return
+        w.close()
+
+    win.connect("notify::is-active", _on_active)
+
+
 class BrightnessPanel(Gtk.Application):
     def __init__(self):
         super().__init__(application_id="dev.serialchiller.brightnesspanel")
@@ -248,6 +266,7 @@ class BrightnessPanel(Gtk.Application):
         key.connect("key-pressed", self._on_key)
         win.add_controller(key)
 
+        autoclose_on_blur(win)
         win.present()
 
     def _apply_style(self, val: int) -> None:

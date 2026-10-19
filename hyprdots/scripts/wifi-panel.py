@@ -178,6 +178,31 @@ def connected_ssid() -> str:
     return out.strip().splitlines()[0] if out.strip() else ""
 
 
+def autoclose_on_blur(win):
+    """Close the window as soon as it loses focus (click elsewhere).
+
+    Suppressed while a child dialog (password prompt) is open, otherwise
+    the main panel would vanish the moment the dialog takes focus.
+    """
+
+    # Only arm auto-close once the window has actually been focused, so a
+    # launch that starts unfocused (e.g. from a terminal) does not vanish.
+    state = {"armed": False}
+
+    def _on_active(w, _pspec):
+        if w.is_active():
+            state["armed"] = True
+            return
+        if not state["armed"]:
+            return
+        for other in w.get_application().get_windows():
+            if other is not w and other.get_transient_for() is w:
+                return
+        w.close()
+
+    win.connect("notify::is-active", _on_active)
+
+
 class WifiPanel(Gtk.Application):
     def __init__(self):
         super().__init__(application_id="dev.serialchiller.wifipanel")
@@ -240,6 +265,7 @@ class WifiPanel(Gtk.Application):
         key.connect("key-pressed", self._on_key)
         win.add_controller(key)
 
+        autoclose_on_blur(win)
         win.present()
 
     def _reload(self):
