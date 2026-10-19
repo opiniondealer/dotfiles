@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Todoist tasks for waybar (custom module, return-type json, streaming).
 
-Shows only tasks due TODAY. Behaviour:
+Shows tasks due TODAY plus anything OVERDUE (past due, still open).
+Behaviour:
   * 0 tasks  -> muted "no tasks" state.
   * 1 task   -> the task stays on screen, no animation.
   * N tasks  -> one line at a time, fading out -> in between tasks.
+Overdue tasks are marked in the tooltip.
 
 The module is a long-running stream: waybar reads one JSON object per line and
 redraws. Fading is done with pango <span alpha="..."> frames (verified to
@@ -65,7 +67,10 @@ def emit(text, tooltip, cls):
 
 
 def fetch_tasks():
-    """Return today's tasks, highest priority first."""
+    """Return tasks due today or overdue, highest priority first.
+
+    Each entry is (task, overdue_bool).
+    """
     test_file = os.environ.get("TODOIST_TEST_FILE")
     try:
         if test_file:
@@ -84,16 +89,18 @@ def fetch_tasks():
     items = payload.get("results", payload) if isinstance(payload, dict) else payload
     today = datetime.date.today().isoformat()
 
-    due_today = []
+    picked = []
     for t in items or []:
         due = t.get("due") or {}
-        raw = due.get("date") or ""
-        if raw[:10] != today:  # also covers tasks with no due date
+        raw = (due.get("date") or "")[:10]
+        if not raw:  # no due date at all
             continue
-        due_today.append(t)
+        if raw > today:  # future task, skip
+            continue
+        picked.append((t, raw < today))  # raw < today == overdue
 
-    due_today.sort(key=lambda t: (-int(t.get("priority", 1)), t.get("id", "")))
-    return due_today, None
+    picked.sort(key=lambda p: (-int(p[0].get("priority", 1)), p[0].get("id", "")))
+    return picked, None
 
 
 def render(name, alpha=None):
@@ -120,21 +127,27 @@ def main():
         if not tasks:
             emit(
                 '<span alpha="70%%">%s no tasks</span>' % ICON,
-                "Nothing due today",
+                "Nothing due today and nothing overdue",
                 "empty",
             )
             time.sleep(REFRESH)
             continue
 
+        n_overdue = sum(1 for _, od in tasks if od)
         names = []
-        for t in tasks:
+        for t, od in tasks:
             name = escape(truncate(t.get("content", ""), limit))
             due = (t.get("due") or {}).get("string") or "today"
             tip = t.get("content", "")
-            if len(tasks) > 1:
-                tip += "\nDue: %s\n\n%d tasks due today (rotating)" % (due, len(tasks))
+            if od:
+                tip += "\nOVERDUE (was: %s)" % due
             else:
                 tip += "\nDue: %s" % due
+            if len(tasks) > 1:
+                tip += "\n\n%d task(s) due/overdue" % len(tasks)
+                if n_overdue:
+                    tip += " (%d overdue)" % n_overdue
+                tip += ", rotating"
             names.append((name, tip))
 
         # Single task: steady, no animation.
