@@ -229,11 +229,19 @@ def paired_devices() -> list[str]:
     return result
 
 
+def adapter_mac() -> str:
+    out = bt("show")
+    m = re.search(r"Controller ([0-9A-F:]{17})", out)
+    return m.group(1) if m else ""
+
+
 def scan_now() -> list[str]:
     """Run a short discovery pass; return the newly seen MACs."""
+    own = adapter_mac()
     before = set(re.findall(r"([0-9A-F:]{17})", bt("devices")))
     both = bt("--timeout", "6", "scan", "on", timeout=12)
     after = set(re.findall(r"([0-9A-F:]{17})", bt("devices") + both))
+    after.discard(own)  # never list the adapter itself
     return sorted(after - before)
 
 
@@ -265,6 +273,7 @@ class BluetoothPanel(Gtk.Application):
         self.power_btn = None
         self.scan_btn = None
         self.new_section = None
+        self._poll_busy = False
 
     # -- ui ------------------------------------------------------------------
 
@@ -360,6 +369,30 @@ class BluetoothPanel(Gtk.Application):
         claim_panel("bluetooth")
         win.present()
         self._reload()
+        GLib.timeout_add(2000, self._poll_state)
+
+    def _poll_state(self):
+        """Refresh the adapter status so external changes (e.g. a manual
+        `rfkill unblock`) show up without reopening the panel."""
+        try:
+            info = adapter_info()
+            blocked = rfkill_soft_blocked()
+            if info["powered"]:
+                self.adapter_lbl.set_text(f"{info['name']} — on")
+                self.adapter_lbl.set_css_classes(["adapter"])
+                self.power_btn.set_label("󰅶")
+                self.power_btn.set_tooltip_text("Power off")
+            else:
+                suffix = " (rfkill blocked)" if blocked else ""
+                self.adapter_lbl.set_text(f"{info['name']} — off{suffix}")
+                self.adapter_lbl.set_css_classes(["adapter-off"])
+                self.power_btn.set_label("󰂲")
+                self.power_btn.set_tooltip_text(
+                    "Power on (unblocks rfkill, asks for admin)" if blocked else "Power on"
+                )
+        except Exception:
+            pass
+        return True
 
     def _clear(self, box: Gtk.ListBox):
         while (child := box.get_first_child()) is not None:
@@ -371,18 +404,25 @@ class BluetoothPanel(Gtk.Application):
         self.new_section.set_visible(False)
 
         info = adapter_info()
-        self._set_status("")
+        if not self._poll_busy:
+            self._set_status("")
+        blocked = rfkill_soft_blocked()
         if info["powered"]:
             self.adapter_lbl.set_text(f"{info['name']} — on")
             self.adapter_lbl.set_css_classes(["adapter"])
             self.power_btn.set_label("󰅶")
-            self.scan_btn.set_sensitive(True)
+            self.power_btn.set_tooltip_text("Power off")
         else:
-            suffix = " (rfkill blocked)" if rfkill_soft_blocked() else ""
+            suffix = " (rfkill blocked)" if blocked else ""
             self.adapter_lbl.set_text(f"{info['name']} — off{suffix}")
             self.adapter_lbl.set_css_classes(["adapter-off"])
             self.power_btn.set_label("󰂲")
-            self.scan_btn.set_sensitive(False)
+            self.power_btn.set_tooltip_text(
+                "Power on (unblocks rfkill, asks for admin)" if blocked else "Power on"
+            )
+        # Scan stays clickable always: clicking while off explains why it can't
+        # scan instead of silently doing nothing.
+        self.scan_btn.set_sensitive(True)
 
         devices = paired_devices()
         if not devices:
@@ -446,30 +486,48 @@ class BluetoothPanel(Gtk.Application):
     def _on_toggle_power(self, _btn):
         info = adapter_info()
         if info["powered"]:
+            self._poll_busy = True
             bt("power", "off")
             self._set_status("Powering off...")
             GLib.timeout_add(700, self._reload_and_false)
             return
 
+        self._poll_busy = True
         if rfkill_soft_blocked():
             self._set_status("Unblocking rfkill (auth prompt)...")
             GLib.timeout_add(50, self._unblock_then_on)
             return
 
-        bt("power", "on")
         self._set_status("Powering on...")
-        GLib.timeout_add(900, self._reload_and_false)
+        GLib.timeout_add(50, self._do_power_on)
 
     def _unblock_then_on(self):
-        run(["pkexec", "rfkill", "unblock", "bluetooth"], timeout=60)
-        bt("power", "on")
-        self._set_status("Powering on...")
+        out = run(["pkexec", "rfkill", "unblock", "bluetooth"], timeout=90)
+        if rfkill_soft_blocked():
+            # pkexec cancelled, no agent, or auth failed.
+            self._poll_busy = False
+            self._set_status(
+                "rfkill still blocked. Run: sudo rfkill unblock bluetooth "
+                "sudo systemctl stop systemd-rfkill.service", error=True,
+            )
+            return False
+        self._do_power_on()
+        return False
+
+    def _do_power_on(self):
+        out = bt("power", "on", timeout=30)
+        if "Failed" in out or "NotReady" in out:
+            self._poll_busy = False
+            self._set_status(f"Power on failed: {out.strip().splitlines()[-1] if out.strip() else 'unknown'}", error=True)
+            return False
+        self._set_status("Powered on")
+        self._poll_busy = False
         GLib.timeout_add(900, self._reload_and_false)
         return False
 
     def _on_scan(self, _btn):
         if not adapter_info()["powered"]:
-            self._set_status("Adapter is off", error=True)
+            self._set_status("Adapter is off — turn it on first (power button)", error=True)
             return
         self.scan_btn.set_sensitive(False)
         self._set_status("Scanning...")
@@ -532,6 +590,7 @@ class BluetoothPanel(Gtk.Application):
         return False
 
     def _reload_and_false(self):
+        self._poll_busy = False
         self._reload()
         return False
 
