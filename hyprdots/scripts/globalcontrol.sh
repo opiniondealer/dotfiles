@@ -41,7 +41,7 @@ pkg_available()
     fi
 }
 
-# AUR tidak relevan di Debian (dummy biar script lain ga error)
+# AUR is irrelevant on Debian (stub so other scripts do not error)
 get_aurhlpr()
 {
     aurhlpr="apt"

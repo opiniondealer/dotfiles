@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# volume-slider.sh — slider volume output/input (yad), live update
+# volume-slider.sh — output/input volume slider (yad), live update
 #
 # Usage:
 #   volume-slider.sh            # slider for the default output (sink)
@@ -37,7 +37,7 @@ GTK_THEME=Serialchiller yad --scale \
     --marks=25:50:75 \
     --print-partial \
     --width=400 --height=130 \
-    --button="Tutup:0" \
+    --button="Close:0" \
     --skip-taskbar --center --on-top \
     2>/dev/null | while IFS= read -r val; do
         v=$(printf '%.0f' "$val" 2>/dev/null) || continue

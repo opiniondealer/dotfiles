@@ -2,7 +2,7 @@
 # brightness-slider.sh — slider brightness laptop (yad), live update
 
 DEV=$(brightnessctl --list 2>/dev/null | awk -F"'" '/backlight/{print $2; exit}')
-[ -z "$DEV" ] && { notify-send -u critical "Brightness" "Tidak ada backlight device"; exit 1; }
+[ -z "$DEV" ] && { notify-send -u critical "Brightness" "No backlight device found"; exit 1; }
 
 cur=$(brightnessctl -d "$DEV" info 2>/dev/null | grep -oE '\([0-9]+%\)' | tr -d '()%')
 cur=${cur:-50}
@@ -16,7 +16,7 @@ GTK_THEME=Serialchiller yad --scale \
     --marks=25:50:75 \
     --print-partial \
     --width=400 --height=130 \
-    --button="Tutup:0" \
+    --button="Close:0" \
     --skip-taskbar --center --on-top \
     2>/dev/null | while IFS= read -r val; do
         v=$(printf '%.0f' "$val" 2>/dev/null) || continue

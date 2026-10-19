@@ -8,7 +8,7 @@ WORKSPACE
   Super + Shift + 1..6    Pindah window ke workspace N
 
 WINDOW
-  Super + W               Tutup window
+  Super + W               Close window
   Super + F               Toggle fullscreen
   Super + Shift + Space   Toggle floating
   Super + V               Toggle split (dwindle)

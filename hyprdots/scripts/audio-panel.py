@@ -84,40 +84,54 @@ scale slider {{
     border-radius: 50%;
     margin: -5px 0;
 }}
-.mute-btn,
-.mute-btn label {{
-    background-color: {CARD};
-    color: {MUTED};
-    border: 1px solid #262626;
+button {{
+    background-image: none;
+    box-shadow: none;
+    text-shadow: none;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    min-height: 0;
+    min-width: 0;
+}}
+.btn {{
+    background-color: #1f1f1f;
+    border: 1px solid #2e2e2e;
     border-radius: 7px;
-    padding: 3px 10px;
-    font-size: 10px;
-    min-height: 18px;
+    padding: 4px 0;
+    min-width: 62px;
+    min-height: 22px;
+    transition: background-color 120ms ease, border-color 120ms ease;
 }}
-.mute-btn:hover,
-.mute-btn:hover label {{
-    background-color: #262626;
-    color: {FG};
-}}
-.mute-btn.on,
-.mute-btn.on label {{
-    background-color: {DESTRUCTIVE};
-    color: #171717;
-}}
-.switch-btn,
-.switch-btn label {{
-    background-color: {CARD};
+.btn label {{
     color: {MUTED};
-    border: 1px solid #262626;
-    border-radius: 6px;
-    padding: 2px 8px;
-    font-size: 9px;
-    min-height: 16px;
+    font-size: 13px;
+    font-weight: normal;
+    letter-spacing: 0;
 }}
-.switch-btn:hover,
-.switch-btn:hover label {{
+.btn:hover {{
     background-color: #262626;
+    border-color: #3a3a3a;
+}}
+.btn:hover label {{
     color: {FG};
+}}
+.btn:active {{
+    background-color: #303030;
+}}
+.btn.on {{
+    background-color: rgba(255, 100, 103, 0.15);
+    border-color: {DESTRUCTIVE};
+}}
+.btn.on label {{
+    color: {DESTRUCTIVE};
+}}
+.btn.on:hover {{
+    background-color: rgba(255, 100, 103, 0.25);
+}}
+.btn.on:hover label {{
+    color: {DESTRUCTIVE};
 }}
 separator {{
     background-color: #262626;
@@ -231,13 +245,15 @@ class Row(Gtk.Box):
         textbox.append(self.sub_lbl)
         header.append(textbox)
 
-        self.mute_btn = Gtk.Button(label="MUTE")
-        self.mute_btn.set_css_classes(["mute-btn"])
+        self.mute_btn = Gtk.Button(label="󰕾")
+        self.mute_btn.set_css_classes(["btn"])
+        self.mute_btn.set_tooltip_text("Mute / unmute")
         self.mute_btn.connect("clicked", self._on_mute)
         header.append(self.mute_btn)
 
-        self.switch_btn = Gtk.Button(label="GANTI")
-        self.switch_btn.set_css_classes(["switch-btn"])
+        self.switch_btn = Gtk.Button(label="󰒓")
+        self.switch_btn.set_css_classes(["btn"])
+        self.switch_btn.set_tooltip_text("Change device")
         self.switch_btn.connect("clicked", self._on_switch)
         header.append(self.switch_btn)
 
@@ -271,13 +287,13 @@ class Row(Gtk.Box):
         self.name_lbl.set_text(name)
         if muted:
             self.value_lbl.set_css_classes(["muted-value"])
-            self.mute_btn.set_css_classes(["mute-btn", "on"])
-            self.mute_btn.set_label("UNMUTE")
+            self.mute_btn.set_css_classes(["btn", "on"])
+            self.mute_btn.set_label("󰝟")
             self.icon_lbl.set_text("󰝟")
         else:
             self.value_lbl.set_css_classes(["value"])
-            self.mute_btn.set_css_classes(["mute-btn"])
-            self.mute_btn.set_label("MUTE")
+            self.mute_btn.set_css_classes(["btn"])
+            self.mute_btn.set_label("󰕾")
             self.icon_lbl.set_text(self._icon_normal)
         self._loading = False
 
@@ -288,7 +304,7 @@ class Row(Gtk.Box):
         set_volume(self.kind, val)
         self.value_lbl.set_text(f"{val}%")
         self.value_lbl.set_css_classes(["value"])
-        self.mute_btn.set_css_classes(["mute-btn"])
+        self.mute_btn.set_css_classes(["btn"])
 
     def _on_mute(self, _btn):
         toggle_mute(self.kind)

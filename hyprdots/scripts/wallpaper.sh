@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# wallpaper.sh — restart hyprpaper dengan aman (detached dari shell)
+# wallpaper.sh — restart hyprpaper safely (detached from the shell)
 # pemakaian: wallpaper.sh [path-gambar]
 #   tanpa argumen -> reload config yang sekarang
 #   dengan argumen -> ganti path di config lalu reload
@@ -16,7 +16,7 @@ if [ -n "$1" ]; then
     esac
 
     if [ ! -f "$IMG" ]; then
-        notify-send -u critical "Wallpaper" "File tidak ditemukan: $IMG"
+        notify-send -u critical "Wallpaper" "File not found: $IMG"
         exit 1
     fi
 
@@ -33,8 +33,8 @@ setsid hyprpaper >/tmp/hyprpaper.log 2>&1 < /dev/null &
 
 sleep 1
 if pgrep -x hyprpaper >/dev/null; then
-    notify-send -t 2000 "Wallpaper" "Aktif: $(basename "$(grep -oP '^\s*path\s*=\s*\K.*' "$CONF" | head -1)")"
+    notify-send -t 2000 "Wallpaper" "Active: $(basename "$(grep -oP '^\s*path\s*=\s*\K.*' "$CONF" | head -1)")"
 else
-    notify-send -u critical "Wallpaper" "hyprpaper gagal start"
+    notify-send -u critical "Wallpaper" "hyprpaper failed to start"
     exit 1
 fi

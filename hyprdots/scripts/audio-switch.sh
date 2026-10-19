@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# audio-switch.sh — pilih output/input audio via wofi (PipeWire/wpctl)
+# audio-switch.sh — pick audio output/input via wofi (PipeWire/wpctl)
 
 clean_name() {
-    # buang prefix panjang controller, rapihin
+    # strip the long controller prefix, tidy up
     sed -e 's/Alder Lake PCH-P High Definition Audio Controller //' \
         -e 's/ High Definition Audio Controller//' \
         -e 's/ Analog Stereo//' \
@@ -30,7 +30,7 @@ pick() {
     local choice
     choice=$(list_dev "$section" "$endmark" | wofi --dmenu --insensitive --prompt "" \
         --width 620 --height 420 \
-        --mesg "$label  (* = sedang dipakai)" 2>/dev/null)
+        --mesg "$label  (* = in use)" 2>/dev/null)
     [ -z "$choice" ] && return
     local id
     id=$(echo "$choice" | awk '{print $NF}')
@@ -39,7 +39,7 @@ pick() {
     if wpctl set-default "$id" 2>/dev/null; then
         notify-send "Audio" "$label -> $name"
     else
-        notify-send -u critical "Audio" "Gagal set $label ke $name"
+        notify-send -u critical "Audio" "Failed to set $label to $name"
     fi
 }
 

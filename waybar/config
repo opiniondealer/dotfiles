@@ -199,11 +199,11 @@
     "backlight": {
         "format": "{icon} {percent}%",
         "format-icons": ["󰃞", "󰃟", "󰃠"],
-        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/brightness-slider.sh",
+        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/brightness-panel.py",
         "on-scroll-up": "brightnessctl -d intel_backlight set 5%+",
         "on-scroll-down": "brightnessctl -d intel_backlight set 5%-",
         "tooltip": true,
-        "tooltip-format": "Brightness {percent}%\nKlik: slider · Scroll: ±5%",
+        "tooltip-format": "Brightness {percent}%\nclick: panel · scroll: ±5%",
         "min-length": 6
     },
 
