@@ -45,11 +45,13 @@ pick() {
 
 main() {
     local mode
-    mode=$(printf 'Output  (speaker / headphone)\nInput   (microphone)\n' | \
-        wofi --dmenu --insensitive --prompt "" --width 420 --height 180 2>/dev/null)
+    mode=$(printf 'Output device   (speaker / headphone)\nInput device    (microphone)\n---\nOutput volume   (slider)\nInput volume    (slider)\n' | \
+        wofi --dmenu --insensitive --prompt "" --width 460 --height 220 2>/dev/null)
     case "$mode" in
-        Output*) pick "Output" "Sinks" "Sources" "OUTPUT" ;;
-        Input*)  pick "Input" "Sources" "Streams" "INPUT" ;;
+        Output\ device*) pick "Output" "Sinks" "Sources" "OUTPUT" ;;
+        Input\ device*)  pick "Input" "Sources" "Streams" "INPUT" ;;
+        Output\ volume*) exec "$(dirname "$0")/volume-slider.sh" sink ;;
+        Input\ volume*)  exec "$(dirname "$0")/volume-slider.sh" source ;;
     esac
 }
 

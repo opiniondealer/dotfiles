@@ -102,7 +102,7 @@ link "$DOTFILES_DIR/hypr/scripts/maxsize.sh" "$HOME/.config/hypr/scripts/maxsize
 # Hyprland helper scripts
 echo "[hyprdots]"
 mkdir -p "$HOME/.config/hyprdots/scripts"
-for s in audio-switch auto-workspace brightness-slider globalcontrol hypr-monitor-listener shortcuts systemupdate wallpaper wifi-menu ws; do
+for s in audio-switch auto-workspace brightness-slider globalcontrol hypr-monitor-listener shortcuts systemupdate wallpaper wifi-menu ws volume-slider; do
     link "$DOTFILES_DIR/hyprdots/scripts/$s.sh" "$HOME/.config/hyprdots/scripts/$s.sh"
 done
 

@@ -143,8 +143,12 @@
     "pulseaudio": {
         "format": "{icon} {volume}%",
         "format-muted": "󰝟",
-        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/audio-switch.sh",
-        "tooltip-format": "{icon} {desc} // {volume}%",
+        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/volume-slider.sh sink",
+        "on-click-right": "bash -lc /home/abay/.config/hyprdots/scripts/audio-switch.sh",
+        "on-click-middle": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+        "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
+        "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
+        "tooltip-format": "{icon} {desc} // {volume}%\n<span size='9'>klik: slider · kanan: pilih device · scroll: volume</span>",
         "scroll-step": 5,
         "format-icons": {
             "headphone": "󰋋",
