@@ -13,16 +13,9 @@
     margin: 0px;
 }
 
-/* paksa lebar panel, jangan fullscreen */
-.control-center {
-    min-width: 400px;
-    min-height: 700px;
-}
-
-.control-center-list-window,
-window.control-center {
-    min-width: 400px;
-}
+/* The layer surface is already sized by config.json (control-center-width
+   /-height). Constraining min-width here made GTK stretch the surface to
+   the whole output instead, so the panel never rendered as a card. */
 
 /* backdrop jangan nutupin layar */
 .blank-window {
@@ -72,9 +65,11 @@ window.control-center {
     color: #fafafa;
 }
 
+/* Header widgets share the notification item's horizontal inset so the
+   title, the Clear all button and the notification cards line up. */
 .widget-title {
     color: #fafafa;
-    margin: 8px;
+    margin: 10px 8px 6px 8px;
     font-weight: bold;
 }
 
@@ -92,7 +87,7 @@ window.control-center {
 
 .widget-dnd {
     color: #fafafa;
-    margin: 8px;
+    margin: 2px 8px 8px 8px;
 }
 
 .widget-dnd switch {
@@ -122,4 +117,23 @@ window.control-center {
 
 .control-center-list-placeholder {
     color: #a1a1a1;
+}
+
+/* swaync gives .notification-row its own horizontal padding; zero it so the
+   cards line up exactly with the title / DND header above them. */
+.control-center .notification-row {
+    padding: 0px;
+    margin: 0px;
+}
+
+.control-center .control-center-list {
+    padding: 0px 8px;
+}
+
+.control-center .widget-title {
+    padding: 0px;
+}
+
+.control-center .widget-dnd {
+    padding: 0px;
 }
