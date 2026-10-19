@@ -57,12 +57,15 @@ def make_px(scale: float):
 # bogus advance width. Pinning the icon font fixes the alignment everywhere.
 NF_FONT = "JetBrainsMono Nerd Font"
 
-# CSS every panel should include so `.nf` labels render real glyphs. Append
-# this to a panel stylesheet (it is scale-independent). `.nf-btn` targets the
-# inner label of an icon button.
+# CSS every panel should include so Nerd Font glyphs and text both render in
+# the same monospace face. Appending this to a panel stylesheet is enough:
+# it sets the font on the window (all descendants inherit) and fixes the two
+# icon-label shapes. Scale-independent.
 NF_CSS = f"""
-.nf, .nf-btn label {{
+window, .nf, .nf-btn label {{
     font-family: "{NF_FONT}";
+}}
+.nf, .nf-btn label {{
     font-weight: normal;
 }}
 """

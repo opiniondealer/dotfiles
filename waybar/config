@@ -203,7 +203,7 @@
     // ---- Backlight ----
     "backlight": {
         "format": "{icon} {percent}%",
-        "format-icons": ["󰃞", "󰃟", "󰃠"],
+        "format-icons": ["󰃝", "󰃞", "󰖨"],
         "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/brightness-panel.py",
         "on-scroll-up": "brightnessctl -d intel_backlight set 5%+",
         "on-scroll-down": "brightnessctl -d intel_backlight set 5%-",

@@ -164,10 +164,10 @@ def icon_for(value: int, name: str) -> str:
     if "kbd" in name or "keyboard" in name:
         return "󰌵"
     if value < 25:
-        return "󰃞"
+        return "\U000f00dd"   # low: half sun
     if value < 60:
-        return "󰃟"
-    return "󰃠"
+        return "\U000f00de"   # mid: full sun
+    return "\U000f05a8"       # high: sun with rays
 
 
 
@@ -254,7 +254,7 @@ class BrightnessPanel(Gtk.Application):
         textbox.append(sub_lbl)
         header.append(textbox)
 
-        self.reset_btn = Gtk.Button(label="󰃠")
+        self.reset_btn = Gtk.Button(label="\U000f05a8")
         self.reset_btn.set_css_classes(["btn", "nf-btn"])
         self.reset_btn.set_tooltip_text("Reset to 100%")
         self.reset_btn.connect("clicked", self._on_reset)
