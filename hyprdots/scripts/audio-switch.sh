@@ -38,7 +38,7 @@ pick() {
     local kind="$1" section="$2" endmark="$3" label="$4"
     local choice
     # wofi has no --mesg (rofi-only). Put the label in the prompt instead.
-    choice=$(list_dev "$section" "$endmark" | wofi --dmenu --insensitive \
+    choice=$(list_dev "$section" "$endmark" | wofi --dmenu --insensitive --normal-window \
         --prompt "$label  (* = in use)" \
         --width 620 --height 420 $(wofi_mon) 2>/dev/null)
     [ -z "$choice" ] && return
@@ -65,7 +65,7 @@ main() {
     # No argument: show the full menu (waybar right-click).
     local mode
     mode=$(printf 'Output device   (speaker / headphone)\nInput device    (microphone)\n---\nOutput volume   (slider)\nInput volume    (slider)\n' | \
-        wofi --dmenu --insensitive --prompt "" --width 460 --height 220 $(wofi_mon) 2>/dev/null)
+        wofi --dmenu --insensitive --normal-window --prompt "" --width 460 --height 220 $(wofi_mon) 2>/dev/null)
     case "$mode" in
         Output\ device*) pick "Output" "Sinks" "Sources" "OUTPUT" ;;
         Input\ device*)  pick "Input" "Sources" "Streams" "INPUT" ;;

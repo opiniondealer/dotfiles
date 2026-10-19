@@ -53,4 +53,4 @@ LIST
 }
 
 # wofi dmenu: scrollable list
-render | wofi --dmenu --insensitive --prompt "" --no-actions --cache-file /dev/null
+render | wofi --dmenu --insensitive --normal-window --prompt "" --no-actions --cache-file /dev/null
