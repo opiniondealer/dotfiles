@@ -8,6 +8,9 @@ Usage: brightness-panel.py
 """
 
 import subprocess
+import os
+import pathlib
+import signal
 import sys
 
 import gi
@@ -162,6 +165,31 @@ def icon_for(value: int, name: str) -> str:
 
 
 
+PANEL_STATE = "/tmp/opencode-serialchiller-panel.pid"
+
+
+def claim_panel(me: str) -> None:
+    """Close any other panel before showing this one.
+
+    Panels are mutually exclusive: opening the audio panel dismisses the
+    wifi panel and vice versa. State lives in PANEL_STATE as
+    "<name> <pid>"; a stale pid is simply ignored.
+    """
+    try:
+        path = pathlib.Path(PANEL_STATE)
+        if path.exists():
+            name, _, pid = path.read_text().strip().partition(" ")
+            if name != me and pid.isdigit():
+                try:
+                    os.kill(int(pid), signal.SIGTERM)
+                except (ProcessLookupError, PermissionError):
+                    pass
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"{me} {os.getpid()}")
+    except Exception:
+        pass
+
+
 class BrightnessPanel(Gtk.Application):
     def __init__(self):
         super().__init__(application_id="dev.serialchiller.brightnesspanel")
@@ -255,6 +283,7 @@ class BrightnessPanel(Gtk.Application):
         key.connect("key-pressed", self._on_key)
         win.add_controller(key)
 
+        claim_panel("brightness")
         win.present()
 
     def _apply_style(self, val: int) -> None:
