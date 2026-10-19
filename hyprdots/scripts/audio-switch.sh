@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 # audio-switch.sh — pick audio output/input via wofi (PipeWire/wpctl)
 
+# Prefer a fixed monitor for popups (the right-hand screen), so they don't
+# steal the screen you're working on. Falls back to the focused monitor.
+wofi_mon() {
+    local want="${WOFI_MONITOR:-DP-2}"
+    if hyprctl monitors -j 2>/dev/null | jq -e --arg n "$want" '.[] | select(.name==$n)' >/dev/null 2>&1; then
+        echo "--monitor $want"
+    fi
+}
+
 clean_name() {
     # strip the long controller prefix, tidy up
     sed -e 's/Alder Lake PCH-P High Definition Audio Controller //' \
@@ -31,7 +40,7 @@ pick() {
     # wofi has no --mesg (rofi-only). Put the label in the prompt instead.
     choice=$(list_dev "$section" "$endmark" | wofi --dmenu --insensitive \
         --prompt "$label  (* = in use)" \
-        --width 620 --height 420 2>/dev/null)
+        --width 620 --height 420 $(wofi_mon) 2>/dev/null)
     [ -z "$choice" ] && return
     local id
     id=$(echo "$choice" | awk '{print $NF}')
@@ -56,7 +65,7 @@ main() {
     # No argument: show the full menu (waybar right-click).
     local mode
     mode=$(printf 'Output device   (speaker / headphone)\nInput device    (microphone)\n---\nOutput volume   (slider)\nInput volume    (slider)\n' | \
-        wofi --dmenu --insensitive --prompt "" --width 460 --height 220 2>/dev/null)
+        wofi --dmenu --insensitive --prompt "" --width 460 --height 220 $(wofi_mon) 2>/dev/null)
     case "$mode" in
         Output\ device*) pick "Output" "Sinks" "Sources" "OUTPUT" ;;
         Input\ device*)  pick "Input" "Sources" "Streams" "INPUT" ;;
