@@ -5,6 +5,7 @@
 @define-color cc-bg #171717;
 @define-color noti-bg #0e0e0e;
 @define-color noti-bg-hover #1f1f1f;
+@define-color noti-bg-focus #1f1f1f;
 @define-color noti-border-color #262626;
 @define-color text-color #fafafa;
 @define-color text-color-disabled #a1a1a1;
@@ -31,17 +32,20 @@
     background: transparent;
 }
 
+/* All horizontal insets MUST be 14px so title / Clear all / DND / cards line
+   up. swaync's own /etc/xdg/swaync/style.css sets
+   `.notification-row .notification-background { padding: 6px 12px }`; that
+   padding stacks on top of any margin we add, so reset it to 0 and use
+   margin only. Verified with a probe stylesheet: card and header both land
+   at 14px from the panel edge.
+   border-radius 6px matches the Clear all button so the outer edges align
+   visually (8px made the card corners bulge past the button edge). */
 .control-center .notification-row .notification-background {
     background: #0e0e0e;
     border: 1px solid #262626;
-    border-radius: 8px;
+    border-radius: 6px;
     margin: 8px 14px;
     padding: 0px;
-}
-
-.notification-row .notification-background .notification {
-    padding: 14px 16px;
-    border-radius: 8px;
 }
 
 .notification .notification-content {
@@ -75,8 +79,9 @@
     color: #fafafa;
 }
 
-/* Header widgets share the notification item's horizontal inset so the
-   title, the Clear all button and the notification cards line up. */
+/* Single source of horizontal inset: 14px everywhere (title, dnd, cards).
+   Do NOT also pad .control-center-list — that stacks with the card margin
+   and pushes the cards 14px further right than the header. */
 .widget-title {
     color: #fafafa;
     margin: 18px 14px 10px 14px;
@@ -113,11 +118,22 @@
     color: #a1a1a1;
 }
 
-/* popup notifikasi */
+/* popup notifikasi (the floating toast, not the control-center card) */
 .notification {
     background: rgba(23, 23, 23, 0.97);
     border: 1px solid #262626;
     border-radius: 8px;
+    color: #fafafa;
+}
+
+/* Inside the control center the card look lives on .notification-background,
+   so the inner .notification must be transparent with no border/radius to
+   avoid a stacked double frame. */
+.control-center .notification-row .notification-background .notification {
+    background: transparent;
+    border: none;
+    border-radius: 0px;
+    padding: 14px 16px;
     color: #fafafa;
 }
 
@@ -136,8 +152,9 @@
     margin: 0px;
 }
 
+/* No padding here: the 14px inset comes from the card's own margin above. */
 .control-center .control-center-list {
-    padding: 0px 14px;
+    padding: 0px;
 }
 
 .control-center .widget-title {
