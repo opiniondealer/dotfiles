@@ -111,9 +111,8 @@
 
     // ---- Todoist tasks (rotating) ----
     "custom/todoist": {
-        "exec": "$HOME/.config/hyprdots/scripts/todoist-tasks.sh",
+        "exec": "$HOME/.config/hyprdots/scripts/todoist-tasks.py",
         "return-type": "json",
-        "interval": 6,
         "tooltip": true,
         "on-click": "bash -lc '$HOME/apps/todoist.AppImage >/dev/null 2>&1 &'"
     },

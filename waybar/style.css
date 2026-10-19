@@ -349,13 +349,15 @@ tooltip label {
 }
 
 /* ===== todoist pill (left of the tray) ===== */
+/* Fixed width so a long task name never pushes the clock/other modules
+   around; the script truncates the text to fit. */
 #custom-todoist {
     font-family: "JetBrainsMono Nerd Font";
     color: @main-fg;
     padding-left: 12px;
     padding-right: 12px;
     margin: 6px 0 6px 0;
-    min-width: 0;
+    min-width: 190px;
 }
 #custom-todoist.empty {
     color: @sc-muted-fg;
