@@ -140,7 +140,7 @@
     // ---- Bluetooth ----
     "bluetooth": {
         "format": "",
-        "on-click": "blueman-manager",
+        "on-click": "bash -lc '~/.config/hyprdots/scripts/bluetooth-panel.py'",
         "format-connected": "",
         "format-disabled": "",
         "format-off": "",
