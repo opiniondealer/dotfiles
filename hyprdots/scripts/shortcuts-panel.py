@@ -4,6 +4,10 @@
 Reads the cheatsheet text produced by shortcuts.sh (render) so the content
 stays in one place, then displays it grouped by section.
 
+Sections are laid out in two balanced columns so the panel fits without
+scrolling on a normal screen. Scrolling stays enabled as a fallback for very
+small displays or when many bindings are added.
+
 Usage: shortcuts-panel.py
 """
 
@@ -17,7 +21,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
-from gi.repository import Gdk, Gtk  # noqa: E402
+from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
 
@@ -144,7 +148,6 @@ class ShortcutsPanel(Gtk.Application):
         win.set_decorated(False)
         win.set_resizable(False)
         win.set_title("shortcuts-panel")
-        win.set_default_size(520, 620)
 
         provider = Gtk.CssProvider()
         provider.load_from_string(CSS)
@@ -163,40 +166,64 @@ class ShortcutsPanel(Gtk.Application):
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_vexpand(True)
 
-        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-
         sections = parse(load_cheatsheet())
+        columns = []
+
         if not sections:
+            content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
             lbl = Gtk.Label(label="Could not load keybinds", xalign=0)
             lbl.set_css_classes(["desc"])
             content.append(lbl)
+            scroll.set_child(content)
         else:
-            for i, (title, items) in enumerate(sections):
-                if i > 0:
-                    spacer = Gtk.Box()
-                    spacer.set_size_request(-1, 10)
-                    content.append(spacer)
+            # Two balanced columns: fill column 0, then column 1, splitting so
+            # both halves carry a similar number of rows.
+            columns = self._split_balanced(sections)
+            cols = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=28)
+            for col_sections in columns:
+                col = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+                for i, (title, items) in enumerate(col_sections):
+                    if i > 0:
+                        spacer = Gtk.Box()
+                        spacer.set_size_request(-1, 10)
+                        col.append(spacer)
 
-                head = Gtk.Label(label=title, xalign=0)
-                head.set_css_classes(["section"])
-                content.append(head)
+                    head = Gtk.Label(label=title, xalign=0)
+                    head.set_css_classes(["section"])
+                    col.append(head)
 
-                grid = Gtk.Grid()
-                grid.set_column_spacing(18)
-                grid.set_row_spacing(3)
-                for r, (key, desc) in enumerate(items):
-                    k = Gtk.Label(label=key, xalign=0)
-                    k.set_css_classes(["key"])
-                    grid.attach(k, 0, r, 1, 1)
-                    d = Gtk.Label(label=desc, xalign=0)
-                    d.set_css_classes(["desc"])
-                    grid.attach(d, 1, r, 1, 1)
-                content.append(grid)
+                    grid = Gtk.Grid()
+                    grid.set_column_spacing(18)
+                    grid.set_row_spacing(3)
+                    for r, (key, desc) in enumerate(items):
+                        k = Gtk.Label(label=key, xalign=0)
+                        k.set_css_classes(["key"])
+                        grid.attach(k, 0, r, 1, 1)
+                        d = Gtk.Label(label=desc, xalign=0)
+                        d.set_css_classes(["desc"])
+                        grid.attach(d, 1, r, 1, 1)
+                    col.append(grid)
+                cols.append(col)
+            scroll.set_child(cols)
 
-        scroll.set_child(content)
         panel.append(scroll)
 
         win.set_child(panel)
+
+        # Size the window from the actual content instead of measure(): count
+        # the rows in the tallest column and convert to pixels. Deterministic
+        # and independent of GTK's layout timing.
+        tallest = 0
+        for col_sections in columns:
+            n = sum(len(items) + 1 for _, items in col_sections) + max(len(col_sections) - 1, 0)
+            tallest = max(tallest, n)
+        ROW_PX = 18      # key/desc line height incl. row spacing
+        PAD = 74         # brand + panel padding + margins
+        est_h = PAD + tallest * ROW_PX
+        disp = Gdk.Display.get_default()
+        mont = disp.get_monitors().get_item(0) if disp else None
+        max_h = mont.get_geometry().height - 90 if mont else est_h
+        win.set_default_size(780, min(est_h, max_h))
 
         key = Gtk.EventControllerKey()
         key.connect("key-pressed", self._on_key)
@@ -204,6 +231,27 @@ class ShortcutsPanel(Gtk.Application):
 
         claim_panel("shortcuts")
         win.present()
+
+    @staticmethod
+    def _split_balanced(sections):
+        """Split sections into two columns with a similar total row count.
+
+        Sections keep their order. We greedily assign each section to the
+        currently shorter column, which balances the two halves well enough
+        for a cheatsheet.
+        """
+        left, right = [], []
+        left_rows = right_rows = 0
+        for sec in sections:
+            # +1 accounts for the section header row.
+            size = len(sec[1]) + 1
+            if left_rows <= right_rows:
+                left.append(sec)
+                left_rows += size
+            else:
+                right.append(sec)
+                right_rows += size
+        return [left, right]
 
     def _on_key(self, _c, keyval, _code, _state):
         if keyval == Gdk.KEY_Escape:
