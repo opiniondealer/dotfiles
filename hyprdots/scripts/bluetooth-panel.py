@@ -23,7 +23,7 @@ from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
 sys.path.insert(0, SCRIPT_DIR)
-from panel_scale import font_scale, make_px, monitor_size  # noqa: E402
+from panel_scale import font_scale, make_px, monitor_size, icon_label, NF_CSS  # noqa: E402
 
 BG = "#171717"
 CARD = "#0e0e0e"
@@ -145,7 +145,7 @@ button {{
     color: {DESTRUCTIVE};
     font-size: {px(13)}px;
 }}
-"""
+""" + NF_CSS
 
 
 def run(cmd: list[str], timeout: int = 25) -> str:
@@ -310,13 +310,13 @@ class BluetoothPanel(Gtk.Application):
         head.append(brand)
 
         self.scan_btn = Gtk.Button(label="󰑐")
-        self.scan_btn.set_css_classes(["btn"])
+        self.scan_btn.set_css_classes(["btn", "nf-btn"])
         self.scan_btn.set_tooltip_text("Scan for new devices")
         self.scan_btn.connect("clicked", self._on_scan)
         head.append(self.scan_btn)
 
         self.power_btn = Gtk.Button(label="󰅶")
-        self.power_btn.set_css_classes(["btn"])
+        self.power_btn.set_css_classes(["btn", "nf-btn"])
         self.power_btn.set_tooltip_text("Toggle power")
         self.power_btn.connect("clicked", self._on_toggle_power)
         head.append(self.power_btn)
@@ -434,17 +434,22 @@ class BluetoothPanel(Gtk.Application):
 
     def _make_device_row(self, mac: str, st: dict, discovered: bool):
         name = st.get("name") or mac
+        connected = st.get("connected")
         row = Gtk.ListBoxRow()
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-        icon = Gtk.Label(label=device_icon(st.get("icon", "")))
-        icon.set_css_classes(["device-active"] if st.get("connected") else ["device"])
+        icon = icon_label(
+            device_icon(st.get("icon", "")),
+            ["device-active"] if connected else ["device"],
+            width_chars=2,
+        )
         box.append(icon)
 
         text = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
         text.set_hexpand(True)
+        text.set_valign(Gtk.Align.CENTER)
         nm = Gtk.Label(label=name, xalign=0)
-        nm.set_css_classes(["device-active"] if st.get("connected") else ["device"])
+        nm.set_css_classes(["device-active"] if connected else ["device"])
         nm.set_ellipsize(3)
         nm.set_max_width_chars(22)
         text.append(nm)
@@ -453,27 +458,39 @@ class BluetoothPanel(Gtk.Application):
         text.append(sub)
         box.append(text)
 
-        if st.get("connected"):
+        if connected:
             badge = Gtk.Label(label="connected")
             badge.set_css_classes(["badge"])
+            badge.set_valign(Gtk.Align.CENTER)
             box.append(badge)
+
+        # action buttons live in a fixed box so the text column stays aligned
+        actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        actions.set_valign(Gtk.Align.CENTER)
 
         if discovered and not st.get("paired"):
             act = Gtk.Button(label="Pair")
             act.set_css_classes(["btn"])
             act.connect("clicked", lambda *_: self._on_pair(mac))
-            box.append(act)
-        elif st.get("connected"):
-            act = Gtk.Button(label="Disconnect")
-            act.set_css_classes(["btn"])
-            act.connect("clicked", lambda *_: self._on_disconnect(mac))
-            box.append(act)
+            actions.append(act)
         else:
-            act = Gtk.Button(label="Connect")
+            act = Gtk.Button(label="Disconnect" if connected else "Connect")
             act.set_css_classes(["btn"])
-            act.connect("clicked", lambda *_: self._on_connect(mac))
-            box.append(act)
+            act.connect(
+                "clicked",
+                (lambda *_: self._on_disconnect(mac))
+                if connected
+                else (lambda *_: self._on_connect(mac)),
+            )
+            actions.append(act)
 
+            unpair = Gtk.Button(label="󰅖")
+            unpair.set_css_classes(["btn", "nf-btn"])
+            unpair.set_tooltip_text("Unpair / forget this device")
+            unpair.connect("clicked", lambda *_: self._on_unpair(mac, name))
+            actions.append(unpair)
+
+        box.append(actions)
         row.set_child(box)
         return row
 
@@ -587,6 +604,22 @@ class BluetoothPanel(Gtk.Application):
         self._set_status(f"Disconnected {mac}")
         run(["notify-send", "Bluetooth", f"Disconnected {mac}"])
         GLib.timeout_add(1000, self._reload_and_false)
+        return False
+
+    def _on_unpair(self, mac: str, name: str):
+        self._set_status(f"Unpairing {name}...")
+        self._do_unpair(mac, name)
+
+    def _do_unpair(self, mac: str, name: str):
+        if device_state(mac).get("connected"):
+            bt("disconnect", mac, timeout=20)
+        out = bt("remove", mac, timeout=20)
+        if "Failed" in out or "not available" in out:
+            self._set_status(f"Unpair failed: {name}", error=True)
+        else:
+            self._set_status(f"Unpaired {name}")
+            run(["notify-send", "Bluetooth", f"Unpaired {name}"])
+        GLib.timeout_add(800, self._reload_and_false)
         return False
 
     def _reload_and_false(self):

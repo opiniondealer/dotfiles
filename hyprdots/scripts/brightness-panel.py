@@ -21,7 +21,7 @@ from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
 sys.path.insert(0, SCRIPT_DIR)
-from panel_scale import font_scale, make_px, monitor_size  # noqa: E402
+from panel_scale import font_scale, make_px, monitor_size, icon_label, NF_CSS  # noqa: E402
 
 # Palette (Minimal Neutral)
 BG = "#171717"
@@ -121,7 +121,7 @@ button {{
 .btn:active {{
     background-color: #303030;
 }}
-"""
+""" + NF_CSS
 
 
 def run(cmd: list[str]) -> str:
@@ -238,8 +238,7 @@ class BrightnessPanel(Gtk.Application):
 
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
 
-        self.icon_lbl = Gtk.Label()
-        self.icon_lbl.set_css_classes(["device-name"])
+        self.icon_lbl = icon_label("", ["device-name"], width_chars=2)
         header.append(self.icon_lbl)
 
         textbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=1)
@@ -256,7 +255,7 @@ class BrightnessPanel(Gtk.Application):
         header.append(textbox)
 
         self.reset_btn = Gtk.Button(label="󰃠")
-        self.reset_btn.set_css_classes(["btn"])
+        self.reset_btn.set_css_classes(["btn", "nf-btn"])
         self.reset_btn.set_tooltip_text("Reset to 100%")
         self.reset_btn.connect("clicked", self._on_reset)
         header.append(self.reset_btn)

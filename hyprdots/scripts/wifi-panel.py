@@ -21,7 +21,7 @@ from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
 sys.path.insert(0, SCRIPT_DIR)
-from panel_scale import font_scale, make_px, monitor_size  # noqa: E402
+from panel_scale import font_scale, make_px, monitor_size, icon_label, NF_CSS  # noqa: E402
 
 BG = "#171717"
 CARD = "#0e0e0e"
@@ -131,7 +131,7 @@ entry:focus {{
     color: {DESTRUCTIVE};
     font-size: {px(13)}px;
 }}
-"""
+""" + NF_CSS
 
 
 def run(cmd: list[str], timeout: int = 20) -> str:
@@ -257,7 +257,7 @@ class WifiPanel(Gtk.Application):
         head.append(brand)
 
         self.refresh_btn = Gtk.Button(label="󰑐")
-        self.refresh_btn.set_css_classes(["btn"])
+        self.refresh_btn.set_css_classes(["btn", "nf-btn"])
         self.refresh_btn.set_tooltip_text("Rescan")
         self.refresh_btn.connect("clicked", self._on_refresh)
         head.append(self.refresh_btn)
@@ -314,8 +314,7 @@ class WifiPanel(Gtk.Application):
         row = Gtk.ListBoxRow()
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
-        icon = Gtk.Label(label=icon_for(signal))
-        icon.set_css_classes(["ssid-active"] if conn else ["ssid"])
+        icon = icon_label(icon_for(signal), ["ssid-active"] if conn else ["ssid"], width_chars=2)
         box.append(icon)
 
         name = Gtk.Label(label=ssid, xalign=0)

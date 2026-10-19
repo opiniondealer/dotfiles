@@ -48,3 +48,39 @@ def make_px(scale: float):
     def px(ref):
         return max(9, int(round(ref * scale)))
     return px
+
+
+# --- icons -----------------------------------------------------------------
+# Nerd Font glyphs must be drawn with a font that actually has them. GTK's
+# default monospace is DejaVu Sans Mono, which lacks every private-use glyph,
+# so icons fall back to a random font and end up glued to the text with a
+# bogus advance width. Pinning the icon font fixes the alignment everywhere.
+NF_FONT = "JetBrainsMono Nerd Font"
+
+# CSS every panel should include so `.nf` labels render real glyphs. Append
+# this to a panel stylesheet (it is scale-independent). `.nf-btn` targets the
+# inner label of an icon button.
+NF_CSS = f"""
+.nf, .nf-btn label {{
+    font-family: "{NF_FONT}";
+    font-weight: normal;
+}}
+"""
+
+
+def icon_label(icon: str, classes: list[str], width_chars: int = 2):
+    """A fixed-width Nerd Font icon label.
+
+    width_chars reserves a stable horizontal slot (in characters, so it scales
+    with the font) so the text that follows always starts at the same x. The
+    glyph is centered inside that slot. Import Gtk before calling this.
+    """
+    from gi.repository import Gtk
+
+    lbl = Gtk.Label(label=icon)
+    lbl.set_css_classes([*classes, "nf"])
+    lbl.set_width_chars(width_chars)
+    lbl.set_xalign(0.5)
+    lbl.set_halign(Gtk.Align.CENTER)
+    lbl.set_valign(Gtk.Align.CENTER)
+    return lbl

@@ -25,7 +25,7 @@ from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
 sys.path.insert(0, SCRIPT_DIR)
-from panel_scale import font_scale, make_px, monitor_size  # noqa: E402
+from panel_scale import font_scale, make_px, monitor_size, icon_label, NF_CSS  # noqa: E402
 
 AUDIO_SWITCH = f"{SCRIPT_DIR}/audio-switch.sh"
 
@@ -146,7 +146,7 @@ separator {{
     min-height: 1px;
     margin: 12px 0 12px 0;
 }}
-"""
+""" + NF_CSS
 
 
 def run(cmd: list[str]) -> str:
@@ -260,8 +260,7 @@ class Row(Gtk.Box):
 
         header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
 
-        self.icon_lbl = Gtk.Label(label=icon)
-        self.icon_lbl.set_css_classes(["device-name"])
+        self.icon_lbl = icon_label(icon, ["device-name"], width_chars=2)
         header.append(self.icon_lbl)
         self._icon_normal = icon
 
@@ -279,13 +278,13 @@ class Row(Gtk.Box):
         header.append(textbox)
 
         self.mute_btn = Gtk.Button(label="󰕾")
-        self.mute_btn.set_css_classes(["btn"])
+        self.mute_btn.set_css_classes(["btn", "nf-btn"])
         self.mute_btn.set_tooltip_text("Mute / unmute")
         self.mute_btn.connect("clicked", self._on_mute)
         header.append(self.mute_btn)
 
         self.switch_btn = Gtk.Button(label="󰒓")
-        self.switch_btn.set_css_classes(["btn"])
+        self.switch_btn.set_css_classes(["btn", "nf-btn"])
         self.switch_btn.set_tooltip_text("Change device")
         self.switch_btn.connect("clicked", self._on_switch)
         header.append(self.switch_btn)
