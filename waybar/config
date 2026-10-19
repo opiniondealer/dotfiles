@@ -49,7 +49,7 @@
     // ---- Clock ----
     "clock": {
         "format": "{:%Y/%m/%d — %H.%M}",
-        "tooltip-format": "<tt>{calendar}</tt>",
+        "tooltip-format": "{calendar}",
         "calendar": {
             "mode": "month",
             "mode-mon-col": 3,
@@ -83,7 +83,7 @@
     "custom/shortcuts": {
         "format": "󰌌",
         "interval": "once",
-        "tooltip": "Keybind Hyprland (klik)",
+        "tooltip": "Hyprland keybinds (click)",
         "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/shortcuts-panel.py"
     },
 
@@ -133,7 +133,7 @@
         "format-ethernet": "󰈀",
         "format-linked": "󰈀 {ifname}",
         "format-disconnected": "󰖪",
-        "tooltip-format": "Network: <big><b>{essid}</b></big>\nSignal: <b>{signaldBm}dBm ({signalStrength}%)</b>\nInterface: <b>{ifname}</b>\nIP: <b>{ipaddr}/{cidr}</b>",
+        "tooltip-format": "Network: {essid}\nSignal: {signaldBm}dBm ({signalStrength}%)\nInterface: {ifname}\nIP: {ipaddr}/{cidr}",
         "interval": 2
     },
 
@@ -145,7 +145,7 @@
         "format-disabled": "",
         "format-off": "",
         "tooltip-format": "{controller_alias}",
-        "tooltip-format-connected": "{controller_alias}\n{num_connections} device terhubung\n\n{device_enumerate}"
+        "tooltip-format-connected": "{controller_alias}\n{num_connections} device(s) connected\n\n{device_enumerate}"
     },
 
     // ---- Audio ----
@@ -156,7 +156,7 @@
         "on-click-middle": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
         "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
         "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
-        "tooltip-format": "{icon} {desc} // {volume}%\n<span size='9'>click: audio panel · scroll: volume</span>",
+        "tooltip-format": "{icon} {desc} — {volume}%\nclick: audio panel · scroll: volume",
         "scroll-step": 5,
         "format-icons": {
             "headphone": "󰋋",
