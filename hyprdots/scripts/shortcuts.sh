@@ -4,8 +4,8 @@
 render() {
 cat <<'LIST'
 WORKSPACE
-  Super + 1..6            Ke workspace N
-  Super + Shift + 1..6    Pindah window ke workspace N
+  Super + 1..6            Go to workspace N
+  Super + Shift + 1..6    Move window to workspace N
 
 WINDOW
   Super + W               Close window
@@ -14,13 +14,13 @@ WINDOW
   Super + V               Toggle split (dwindle)
   Super + H               Swap split
   Super + Left/Right/Up/Down    Focus window
-  Super + Shift + Arrow         Pindah window (swap)
+  Super + Shift + Arrow         Move window (swap)
   Super + Ctrl + Arrow          Resize window
-  Super + Backspace       Submap resize (arrow, Esc keluar)
-  Alt + Tab               Window berikutnya
-  Alt + Shift + Tab       Window sebelumnya
-  Alt + `                 Window terakhir fokus
-  Super + mouse drag      Pindah window
+  Super + Backspace       Resize submap (arrows, Esc exits)
+  Alt + Tab               Next window
+  Alt + Shift + Tab       Previous window
+  Alt + `                 Last focused window
+  Super + mouse drag      Move window
   Super + mouse right-drag  Resize window
 
 APPS
@@ -37,20 +37,26 @@ APPS
   Super + Shift + D       lazydocker
 
 SCREENSHOT
-  Print                   Pilih area -> simpan
+  Print                   Select area -> save
   Ctrl + Print            Full screen -> clipboard
-  Shift + Print           Monitor aktif -> simpan
-  Super + Shift + S       Pilih area -> simpan + clipboard + notif
+  Shift + Print           Active monitor -> save
+  Super + Shift + S       Select area -> save + clipboard + notif
 
 SYSTEM
   Super + L               Lock screen (hyprlock)
   Super + Shift + M       Display settings (nwg-displays)
   Super + Shift + C       Reload Hyprland
-  Super + /               Cheatsheet ini
+  Super + /               This cheatsheet
   Super + Shift + E       Exit Hyprland
 
 LIST
 }
 
-# wofi dmenu: scrollable list
+# --print: emit the raw cheatsheet (used by shortcuts-panel.py)
+if [ "${1:-}" = "--print" ]; then
+    render
+    exit 0
+fi
+
+# fallback: wofi dmenu
 render | wofi --dmenu --insensitive --normal-window --prompt "" --no-actions --cache-file /dev/null

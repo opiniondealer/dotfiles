@@ -83,7 +83,7 @@
         "format": "󰌌",
         "interval": "once",
         "tooltip": "Keybind Hyprland (klik)",
-        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/shortcuts.sh"
+        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/shortcuts-panel.py"
     },
 
     // ---- Notification (swaync) ----
@@ -118,7 +118,7 @@
     "network": {
         "interface": "wlo1",
         "tooltip": true,
-        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/wifi-menu.sh",
+        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/wifi-panel.py",
         "on-click-right": "nm-connection-editor",
         "format-wifi": "󰖩",
         "format-ethernet": "󰈀",
@@ -144,11 +144,10 @@
         "format": "{icon} {volume}%",
         "format-muted": "󰝟",
         "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/audio-panel.py",
-        "on-click-right": "bash -lc /home/abay/.config/hyprdots/scripts/audio-switch.sh",
         "on-click-middle": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
         "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
         "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
-        "tooltip-format": "{icon} {desc} // {volume}%\n<span size='9'>klik: panel audio · kanan: pilih device · scroll: volume</span>",
+        "tooltip-format": "{icon} {desc} // {volume}%\n<span size='9'>click: audio panel · scroll: volume</span>",
         "scroll-step": 5,
         "format-icons": {
             "headphone": "󰋋",
