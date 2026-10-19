@@ -17,6 +17,7 @@
         "custom/l_end", "clock", "custom/r_end"
     ],
     "modules-right": [
+        "custom/l_end", "custom/todoist", "custom/r_end",
         "custom/l_end", "tray", "custom/r_end",
         "custom/l_end", "custom/shortcuts", "network", "bluetooth", "pulseaudio", "custom/r_end",
         "custom/l_end", "cpu", "memory", "battery", "backlight", "custom/notification", "custom/r_end",
@@ -106,6 +107,15 @@
         "on-click": "swaync-client -t -sw",
         "on-click-right": "swaync-client -d -sw",
         "escape": true
+    },
+
+    // ---- Todoist tasks (rotating) ----
+    "custom/todoist": {
+        "exec": "$HOME/.config/hyprdots/scripts/todoist-tasks.sh",
+        "return-type": "json",
+        "interval": 6,
+        "tooltip": true,
+        "on-click": "bash -lc '$HOME/apps/todoist.AppImage >/dev/null 2>&1 &'"
     },
 
     // ---- Tray ----
