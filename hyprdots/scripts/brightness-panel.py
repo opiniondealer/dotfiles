@@ -21,7 +21,10 @@ from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
 sys.path.insert(0, SCRIPT_DIR)
-from panel_scale import font_scale, make_px, monitor_size, icon_label, NF_CSS  # noqa: E402
+from panel_scale import (
+    font_scale, make_px, monitor_size, icon_label, NF_CSS,
+    toggle_panel, register_panel, release_panel,
+)  # noqa: E402
 
 # Palette (Minimal Neutral)
 BG = "#171717"
@@ -230,7 +233,7 @@ class BrightnessPanel(Gtk.Application):
 
         panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         panel.set_css_classes(["panel"])
-        panel.set_size_request(int(360 * scale), -1)
+        panel.set_size_request(int(320 * scale), -1)
 
         brand = Gtk.Label(label="D I S P L A Y", xalign=0)
         brand.set_css_classes(["brand"])
@@ -292,7 +295,7 @@ class BrightnessPanel(Gtk.Application):
         key.connect("key-pressed", self._on_key)
         win.add_controller(key)
 
-        claim_panel("brightness")
+        register_panel("brightness")
         win.present()
 
     def _apply_style(self, val: int) -> None:
@@ -338,7 +341,12 @@ class BrightnessPanel(Gtk.Application):
 
 
 def main() -> int:
-    return BrightnessPanel().run(sys.argv)
+    if toggle_panel("brightness"):
+        return 0
+    try:
+        return BrightnessPanel().run(sys.argv)
+    finally:
+        release_panel("brightness")
 
 
 if __name__ == "__main__":

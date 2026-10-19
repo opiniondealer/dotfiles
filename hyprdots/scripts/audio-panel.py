@@ -25,7 +25,10 @@ from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
 sys.path.insert(0, SCRIPT_DIR)
-from panel_scale import font_scale, make_px, monitor_size, icon_label, NF_CSS  # noqa: E402
+from panel_scale import (
+    font_scale, make_px, monitor_size, icon_label, NF_CSS,
+    toggle_panel, register_panel, release_panel,
+)  # noqa: E402
 
 AUDIO_SWITCH = f"{SCRIPT_DIR}/audio-switch.sh"
 
@@ -396,7 +399,7 @@ class AudioPanel(Gtk.Application):
 
         panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         panel.set_css_classes(["panel"])
-        panel.set_size_request(int(360 * scale), -1)
+        panel.set_size_request(int(320 * scale), -1)
 
         brand = Gtk.Label(label="A U D I O", xalign=0)
         brand.set_css_classes(["brand"])
@@ -421,7 +424,7 @@ class AudioPanel(Gtk.Application):
         key.connect("key-pressed", self._on_key)
         win.add_controller(key)
 
-        claim_panel("audio")
+        register_panel("audio")
         win.present()
 
     def _tick(self):
@@ -441,8 +444,12 @@ class AudioPanel(Gtk.Application):
 
 
 def main() -> int:
-    app = AudioPanel()
-    return app.run(sys.argv)
+    if toggle_panel("audio"):
+        return 0
+    try:
+        return AudioPanel().run(sys.argv)
+    finally:
+        release_panel("audio")
 
 
 if __name__ == "__main__":

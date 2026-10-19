@@ -27,7 +27,10 @@ from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
 sys.path.insert(0, SCRIPT_DIR)
-from panel_scale import font_scale, make_px, monitor_size, icon_label, NF_CSS  # noqa: E402
+from panel_scale import (
+    font_scale, make_px, monitor_size, icon_label, NF_CSS,
+    toggle_panel, register_panel, release_panel,
+)  # noqa: E402
 
 BG = "#171717"
 CARD = "#0e0e0e"
@@ -61,38 +64,38 @@ label {{
 }}
 .month {{
     color: {ACCENT};
-    font-size: {px(24)}px;
+    font-size: {px(19)}px;
     font-weight: bold;
     letter-spacing: 1px;
 }}
 .year {{
     color: {MUTED};
-    font-size: {px(24)}px;
+    font-size: {px(19)}px;
     font-weight: bold;
 }}
 .weekday {{
     color: {ACCENT};
-    font-size: {px(12)}px;
+    font-size: {px(10)}px;
     font-weight: bold;
-    letter-spacing: 1px;
+    letter-spacing: 0;
 }}
 .day {{
     color: {FG};
-    font-size: {px(16)}px;
+    font-size: {px(14)}px;
 }}
 .day-other {{
     color: {DIM};
-    font-size: {px(16)}px;
+    font-size: {px(14)}px;
 }}
 .day-today {{
     color: {ACCENT};
-    font-size: {px(16)}px;
+    font-size: {px(14)}px;
     font-weight: bold;
     text-decoration: underline;
 }}
 .slot {{
-    min-width: {px(54)}px;
-    min-height: {px(34)}px;
+    min-width: {px(30)}px;
+    min-height: {px(26)}px;
 }}
 button {{
     background-image: none;
@@ -171,7 +174,7 @@ class CalendarPanel(Gtk.Application):
         _sw, _sh = monitor_size()
         scale = font_scale(_sh)
         self.scale = scale
-        win.set_default_size(int(430 * scale), -1)
+        win.set_default_size(int(360 * scale), -1)
 
         provider = Gtk.CssProvider()
         provider.load_from_string(build_css(scale))
@@ -180,7 +183,7 @@ class CalendarPanel(Gtk.Application):
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
 
-        panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=9)
         panel.set_css_classes(["panel"])
 
         # --- header: month (left) + year (right) + nav buttons ---
@@ -216,7 +219,7 @@ class CalendarPanel(Gtk.Application):
         panel.append(nav)
 
         # --- weekday header row ---
-        wk = Gtk.Grid(column_homogeneous=True, row_spacing=6, column_spacing=6)
+        wk = Gtk.Grid(column_homogeneous=True, row_spacing=6, column_spacing=4)
         for i, name in enumerate(WEEKDAYS):
             lbl = Gtk.Label(label=name)
             lbl.set_css_classes(["weekday"])
@@ -237,7 +240,7 @@ class CalendarPanel(Gtk.Application):
         scroll.connect("scroll", self._on_scroll)
         win.add_controller(scroll)
 
-        claim_panel("calendar")
+        register_panel("calendar")
         win.present()
         self._render()
 
@@ -328,7 +331,12 @@ class CalendarPanel(Gtk.Application):
 
 
 def main() -> int:
-    return CalendarPanel().run(sys.argv)
+    if toggle_panel("calendar"):
+        return 0
+    try:
+        return CalendarPanel().run(sys.argv)
+    finally:
+        release_panel("calendar")
 
 
 if __name__ == "__main__":

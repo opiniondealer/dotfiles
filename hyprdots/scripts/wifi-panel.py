@@ -21,7 +21,10 @@ from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
 sys.path.insert(0, SCRIPT_DIR)
-from panel_scale import font_scale, make_px, monitor_size, icon_label, NF_CSS  # noqa: E402
+from panel_scale import (
+    font_scale, make_px, monitor_size, icon_label, NF_CSS,
+    toggle_panel, register_panel, release_panel,
+)  # noqa: E402
 
 BG = "#171717"
 CARD = "#0e0e0e"
@@ -239,7 +242,7 @@ class WifiPanel(Gtk.Application):
         _sw, _sh = monitor_size()
         scale = font_scale(_sh)
         self.scale = scale
-        win.set_default_size(int(430 * scale), int(480 * scale))
+        win.set_default_size(int(380 * scale), int(420 * scale))
 
         provider = Gtk.CssProvider()
         provider.load_from_string(build_css(scale))
@@ -270,7 +273,7 @@ class WifiPanel(Gtk.Application):
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_vexpand(True)
-        scroll.set_size_request(int(394 * scale), int(360 * scale))
+        scroll.set_size_request(int(344 * scale), int(300 * scale))
 
         self.listbox = Gtk.ListBox()
         self.listbox.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -290,7 +293,7 @@ class WifiPanel(Gtk.Application):
         key.connect("key-pressed", self._on_key)
         win.add_controller(key)
 
-        claim_panel("wifi")
+        register_panel("wifi")
         win.present()
 
     def _reload(self):
@@ -441,7 +444,12 @@ class WifiPanel(Gtk.Application):
 
 
 def main() -> int:
-    return WifiPanel().run(sys.argv)
+    if toggle_panel("wifi"):
+        return 0
+    try:
+        return WifiPanel().run(sys.argv)
+    finally:
+        release_panel("wifi")
 
 
 if __name__ == "__main__":

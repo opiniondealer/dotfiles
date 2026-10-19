@@ -257,7 +257,7 @@ class ShortcutsPanel(Gtk.Application):
         key.connect("key-pressed", self._on_key)
         win.add_controller(key)
 
-        claim_panel("shortcuts")
+        register_panel("shortcuts")
         win.present()
 
     @staticmethod
@@ -290,7 +290,12 @@ class ShortcutsPanel(Gtk.Application):
 
 
 def main() -> int:
-    return ShortcutsPanel().run(sys.argv)
+    if toggle_panel("shortcuts"):
+        return 0
+    try:
+        return ShortcutsPanel().run(sys.argv)
+    finally:
+        release_panel("shortcuts")
 
 
 if __name__ == "__main__":

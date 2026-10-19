@@ -11,6 +11,9 @@ The module is import-safe: it does not run GTK code at import time.
 """
 
 import json
+import os
+import pathlib
+import signal
 import subprocess
 
 PX_REF_H = 1080.0     # reference monitor height the sizes are designed for
@@ -87,3 +90,91 @@ def icon_label(icon: str, classes: list[str], width_chars: int = 2):
     lbl.set_halign(Gtk.Align.CENTER)
     lbl.set_valign(Gtk.Align.CENTER)
     return lbl
+
+
+# --- panel toggle ----------------------------------------------------------
+# Panels are mutually exclusive through a shared state file. On top of that,
+# clicking the waybar button again should toggle the panel closed. Each panel
+# runs its own process, so a second launch cannot see the first one; instead
+# every panel goes through this helper: `toggle_panel(name)` exits the caller
+# acting as a "close" if the panel `name` is already running, otherwise it
+# records itself and the caller keeps going.
+STATE_DIR = "/tmp/opencode-serialchiller-panels"
+
+
+def _state_file(name: str):
+    return pathlib.Path(STATE_DIR) / f"{name}.pid"
+
+
+def another_panel_running(name: str):
+    """Close any *other* panel that is currently open. Returns nothing."""
+    for f in pathlib.Path(STATE_DIR).glob("*.pid"):
+        other = f.stem
+        if other == name:
+            continue
+        _close_pid_file(f)
+
+
+def panel_is_open(name: str) -> bool:
+    f = _state_file(name)
+    if not f.exists():
+        return False
+    try:
+        pid = int(f.read_text().strip())
+        os.kill(pid, 0)  # 0 == probe, raises if gone
+        return True
+    except (ValueError, ProcessLookupError, PermissionError):
+        try:
+            f.unlink()
+        except Exception:
+            pass
+        return False
+
+
+def _close_pid_file(f):
+    try:
+        pid = int(f.read_text().strip())
+        os.kill(pid, signal.SIGTERM)
+    except Exception:
+        pass
+    try:
+        f.unlink()
+    except Exception:
+        pass
+
+
+def close_panel(name: str) -> None:
+    f = _state_file(name)
+    if f.exists():
+        _close_pid_file(f)
+
+
+def register_panel(name: str) -> None:
+    """Record this process as the owner of panel `name` and close siblings."""
+    pathlib.Path(STATE_DIR).mkdir(parents=True, exist_ok=True)
+    _state_file(name).write_text(str(os.getpid()))
+    another_panel_running(name)
+
+
+def release_panel(name: str) -> None:
+    f = _state_file(name)
+    try:
+        if f.exists() and f.read_text().strip() == str(os.getpid()):
+            f.unlink()
+    except Exception:
+        pass
+
+
+def toggle_panel(name: str) -> bool:
+    """Return True if the caller should exit (= the panel was open, so this
+    invocation just closes it). Return False when the caller should open.
+
+    Typical use at the top of main():
+
+        if toggle_panel("calendar"):
+            return 0
+    """
+    if panel_is_open(name):
+        close_panel(name)
+        return True
+    return False
