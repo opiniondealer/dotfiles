@@ -19,6 +19,10 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
 from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
+SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
+sys.path.insert(0, SCRIPT_DIR)
+from panel_scale import font_scale, make_px, monitor_size  # noqa: E402
+
 # Palette (Minimal Neutral)
 BG = "#171717"
 FG = "#fafafa"
@@ -26,7 +30,10 @@ MUTED = "#a1a1a1"
 ACCENT = "#91c5ff"
 WARN = "#e0c07b"
 
-CSS = f"""
+
+def build_css(scale: float):
+    px = make_px(scale)
+    return f"""
 window {{
     background-color: {BG};
 }}
@@ -34,37 +41,37 @@ window {{
     background-color: {BG};
     border: 1px solid #262626;
     border-radius: 14px;
-    padding: 18px 20px 16px 20px;
+    padding: {px(18)}px {px(20)}px {px(16)}px {px(20)}px;
 }}
 label {{
     color: {FG};
 }}
 .brand {{
     color: {MUTED};
-    font-size: 10px;
+    font-size: {px(13)}px;
     letter-spacing: 2px;
 }}
 .device-name {{
     color: {FG};
-    font-size: 13px;
+    font-size: {px(16)}px;
     font-weight: bold;
 }}
 .device-sub {{
     color: {MUTED};
-    font-size: 10px;
+    font-size: {px(13)}px;
 }}
 .value {{
     color: {ACCENT};
-    font-size: 12px;
+    font-size: {px(15)}px;
     font-weight: bold;
 }}
 .low-value {{
     color: {WARN};
-    font-size: 12px;
+    font-size: {px(15)}px;
     font-weight: bold;
 }}
 scale trough {{
-    min-height: 5px;
+    min-height: {px(5)}px;
     border-radius: 3px;
     background-color: #262626;
 }}
@@ -73,11 +80,10 @@ scale highlight {{
     border-radius: 3px;
 }}
 scale slider {{
-    min-width: 14px;
-    min-height: 14px;
+    min-width: {px(14)}px;
+    min-height: {px(14)}px;
     background-color: {FG};
     border-radius: 50%;
-    margin: -5px 0;
 }}
 button {{
     background-image: none;
@@ -94,14 +100,14 @@ button {{
     background-color: #1f1f1f;
     border: 1px solid #2e2e2e;
     border-radius: 7px;
-    padding: 4px 0;
-    min-width: 62px;
-    min-height: 22px;
+    padding: {px(4)}px 0;
+    min-width: {px(62)}px;
+    min-height: {px(22)}px;
     transition: background-color 120ms ease, border-color 120ms ease;
 }}
 .btn label {{
     color: {MUTED};
-    font-size: 13px;
+    font-size: {px(16)}px;
     font-weight: normal;
     letter-spacing: 0;
 }}
@@ -212,15 +218,19 @@ class BrightnessPanel(Gtk.Application):
         win.set_resizable(False)
         win.set_title("brightness-panel")
 
+        # Scale fonts and panel width with the focused monitor.
+        _sw, _sh = monitor_size()
+        scale = font_scale(_sh)
+
         provider = Gtk.CssProvider()
-        provider.load_from_string(CSS)
+        provider.load_from_string(build_css(scale))
         Gtk.StyleContext.add_provider_for_display(
             Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
 
         panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         panel.set_css_classes(["panel"])
-        panel.set_size_request(360, -1)
+        panel.set_size_request(int(360 * scale), -1)
 
         brand = Gtk.Label(label="D I S P L A Y", xalign=0)
         brand.set_css_classes(["brand"])

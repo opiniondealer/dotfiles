@@ -19,6 +19,10 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Gdk", "4.0")
 from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
+SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
+sys.path.insert(0, SCRIPT_DIR)
+from panel_scale import font_scale, make_px, monitor_size  # noqa: E402
+
 BG = "#171717"
 CARD = "#0e0e0e"
 FG = "#fafafa"
@@ -26,7 +30,10 @@ MUTED = "#a1a1a1"
 ACCENT = "#91c5ff"
 DESTRUCTIVE = "#ff6467"
 
-CSS = f"""
+
+def build_css(scale: float):
+    px = make_px(scale)
+    return f"""
 window {{
     background-color: {BG};
 }}
@@ -34,37 +41,37 @@ window {{
     background-color: {BG};
     border: 1px solid #262626;
     border-radius: 14px;
-    padding: 16px 18px 14px 18px;
+    padding: {px(16)}px {px(18)}px {px(14)}px {px(18)}px;
 }}
 label {{
     color: {FG};
 }}
 .brand {{
     color: {MUTED};
-    font-size: 10px;
+    font-size: {px(13)}px;
     letter-spacing: 2px;
 }}
 .ssid {{
     color: {FG};
-    font-size: 12px;
+    font-size: {px(15)}px;
 }}
 .ssid-active {{
     color: {ACCENT};
-    font-size: 12px;
+    font-size: {px(15)}px;
     font-weight: bold;
 }}
 .signal {{
     color: {MUTED};
-    font-size: 11px;
+    font-size: {px(14)}px;
 }}
 .badge {{
     color: {ACCENT};
-    font-size: 9px;
+    font-size: {px(12)}px;
 }}
 row {{
     background-color: transparent;
     border-radius: 8px;
-    padding: 6px 8px;
+    padding: {px(6)}px {px(8)}px;
 }}
 row:hover {{
     background-color: #1f1f1f;
@@ -90,12 +97,12 @@ button {{
     background-color: #1f1f1f;
     border: 1px solid #2e2e2e;
     border-radius: 7px;
-    padding: 4px 12px;
-    min-height: 22px;
+    padding: {px(4)}px {px(12)}px;
+    min-height: {px(22)}px;
 }}
 .btn label {{
     color: {MUTED};
-    font-size: 10px;
+    font-size: {px(13)}px;
     font-weight: bold;
 }}
 .btn:hover {{
@@ -110,19 +117,19 @@ entry {{
     color: {FG};
     border: 1px solid #2e2e2e;
     border-radius: 7px;
-    padding: 6px 9px;
-    font-size: 12px;
+    padding: {px(6)}px {px(9)}px;
+    font-size: {px(15)}px;
 }}
 entry:focus {{
     border-color: {ACCENT};
 }}
 .status {{
     color: {MUTED};
-    font-size: 10px;
+    font-size: {px(13)}px;
 }}
 .status-error {{
     color: {DESTRUCTIVE};
-    font-size: 10px;
+    font-size: {px(13)}px;
 }}
 """
 
@@ -212,6 +219,7 @@ class WifiPanel(Gtk.Application):
         super().__init__(application_id="dev.serialchiller.wifipanel")
         self.listbox = None
         self.status_lbl = None
+        self.scale = 1.0
 
     def do_activate(self):
         # Single instance: if a window is already open, just focus it.
@@ -224,10 +232,17 @@ class WifiPanel(Gtk.Application):
         win.set_decorated(False)
         win.set_resizable(False)
         win.set_title("wifi-panel")
-        win.set_default_size(430, 480)
+
+        # Scale fonts and geometry with the focused monitor. The wifi list is
+        # scrollable, so the window keeps a fixed (scaled) size instead of
+        # fitting the content.
+        _sw, _sh = monitor_size()
+        scale = font_scale(_sh)
+        self.scale = scale
+        win.set_default_size(int(430 * scale), int(480 * scale))
 
         provider = Gtk.CssProvider()
-        provider.load_from_string(CSS)
+        provider.load_from_string(build_css(scale))
         Gtk.StyleContext.add_provider_for_display(
             Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
@@ -255,7 +270,7 @@ class WifiPanel(Gtk.Application):
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         scroll.set_vexpand(True)
-        scroll.set_size_request(394, 360)
+        scroll.set_size_request(int(394 * scale), int(360 * scale))
 
         self.listbox = Gtk.ListBox()
         self.listbox.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -373,7 +388,7 @@ class WifiPanel(Gtk.Application):
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         box.set_css_classes(["panel"])
-        box.set_size_request(340, -1)
+        box.set_size_request(int(340 * getattr(self, "scale", 1.0)), -1)
 
         lbl = Gtk.Label(label=f"Password for {ssid}", xalign=0)
         lbl.set_css_classes(["ssid"])

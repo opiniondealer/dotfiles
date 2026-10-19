@@ -16,6 +16,7 @@ import os
 import pathlib
 import signal
 import sys
+import json
 
 import gi
 
@@ -24,13 +25,24 @@ gi.require_version("Gdk", "4.0")
 from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
+sys.path.insert(0, SCRIPT_DIR)
+from panel_scale import font_scale, make_px, monitor_size  # noqa: E402
 
 BG = "#171717"
 FG = "#fafafa"
 MUTED = "#a1a1a1"
 ACCENT = "#91c5ff"
 
-CSS = f"""
+# Font scale: sizes are expressed in px against a 1080p reference and scaled
+# with the monitor height, so the cheatsheet looks the same on a 1080p panel
+# and on a HiDPI laptop panel.
+FS_BASE = 14.0  # key/desc font at the reference height
+
+
+def build_css(scale: float):
+    px = make_px(scale)
+
+    return f"""
 window {{
     background-color: {BG};
 }}
@@ -38,29 +50,29 @@ window {{
     background-color: {BG};
     border: 1px solid #262626;
     border-radius: 14px;
-    padding: 16px 18px 14px 18px;
+    padding: {px(16)}px {px(18)}px {px(14)}px {px(18)}px;
 }}
 label {{
     color: {FG};
 }}
 .brand {{
     color: {MUTED};
-    font-size: 10px;
+    font-size: {px(13)}px;
     letter-spacing: 2px;
 }}
 .section {{
     color: {ACCENT};
-    font-size: 10px;
+    font-size: {px(13)}px;
     font-weight: bold;
     letter-spacing: 1.5px;
 }}
 .key {{
     color: {FG};
-    font-size: 11px;
+    font-size: {px(FS_BASE)}px;
 }}
 .desc {{
     color: {MUTED};
-    font-size: 11px;
+    font-size: {px(FS_BASE)}px;
 }}
 scrolledwindow {{
     background-color: transparent;
@@ -149,8 +161,13 @@ class ShortcutsPanel(Gtk.Application):
         win.set_resizable(False)
         win.set_title("shortcuts-panel")
 
+        # Scale fonts and geometry with the monitor the window opens on, so the
+        # panel looks identical on 1080p and HiDPI panels.
+        sw, sh = monitor_size()
+        scale = font_scale(sh)
+
         provider = Gtk.CssProvider()
-        provider.load_from_string(CSS)
+        provider.load_from_string(build_css(scale))
         Gtk.StyleContext.add_provider_for_display(
             Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
@@ -164,7 +181,9 @@ class ShortcutsPanel(Gtk.Application):
 
         scroll = Gtk.ScrolledWindow()
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        scroll.set_vexpand(True)
+        # Let the scrolled window report the child's natural height upward so
+        # the window can be sized to the content instead of a guessed value.
+        scroll.set_propagate_natural_height(True)
 
         sections = parse(load_cheatsheet())
         columns = []
@@ -210,20 +229,29 @@ class ShortcutsPanel(Gtk.Application):
 
         win.set_child(panel)
 
-        # Size the window from the actual content instead of measure(): count
-        # the rows in the tallest column and convert to pixels. Deterministic
-        # and independent of GTK's layout timing.
-        tallest = 0
-        for col_sections in columns:
-            n = sum(len(items) + 1 for _, items in col_sections) + max(len(col_sections) - 1, 0)
-            tallest = max(tallest, n)
-        ROW_PX = 18      # key/desc line height incl. row spacing
-        PAD = 74         # brand + panel padding + margins
-        est_h = PAD + tallest * ROW_PX
-        disp = Gdk.Display.get_default()
-        mont = disp.get_monitors().get_item(0) if disp else None
-        max_h = mont.get_geometry().height - 90 if mont else est_h
-        win.set_default_size(780, min(est_h, max_h))
+        # Width is a share of the monitor; height follows the content (fitted
+        # after the first layout pass, capped to a share of the monitor) so a
+        # short cheatsheet stays tight and a long one scrolls.
+        W_PCT = 0.42        # width as a share of the monitor width
+        MIN_W_PCT = 0.34    # never narrower than this share
+        MAX_H_PCT = 0.68    # never taller than this share of the monitor
+
+        w = max(int(sw * W_PCT), int(sw * MIN_W_PCT))
+        win.set_default_size(w, 1)  # height comes from the content (see below)
+
+        # Freeze the height once the content has been measured, capped to a
+        # share of the monitor. Uses the scrolled window's propagated natural
+        # height, which is only valid after the first layout pass.
+        def _fit_height(_win=None):
+            _, nat_h, _, _ = scroll.measure(Gtk.Orientation.VERTICAL, -1)
+            if nat_h <= 1:
+                return False
+            chrome = int(51 * scale) + 2  # brand + panel padding (scaled)
+            h = min(nat_h + chrome + 8, int(sh * MAX_H_PCT))
+            win.set_default_size(w, h)
+            return False
+
+        win.connect("realize", lambda *_: GLib.idle_add(_fit_height))
 
         key = Gtk.EventControllerKey()
         key.connect("key-pressed", self._on_key)
