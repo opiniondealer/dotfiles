@@ -49,24 +49,9 @@
     // ---- Clock ----
     "clock": {
         "format": "{:%Y/%m/%d — %H.%M}",
-        "tooltip-format": "{calendar}",
-        "calendar": {
-            "mode": "month",
-            "mode-mon-col": 3,
-            "weeks-pos": "right",
-            "on-scroll": 1,
-            "format": {
-                "months": "<span color='#91c5ff'><b>{}</b></span>",
-                "days": "<span color='#a1a1a1'>{}</span>",
-                "weekdays": "<span color='#fafafa'><b>{}</b></span>",
-                "today": "<span color='#91c5ff'><b>{}</b></span>"
-            }
-        },
-        "actions": {
-            "on-click-right": "mode",
-            "on-scroll-up": "shift_up",
-            "on-scroll-down": "shift_down"
-        }
+        "tooltip-format": "{:%A, %d %B %Y}",
+        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/calendar-panel.py",
+        "on-click-right": "bash -lc /home/abay/.config/hyprdots/scripts/calendar-panel.py"
     },
 
     // ---- Updates (Debian) ----
