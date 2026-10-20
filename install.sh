@@ -65,10 +65,10 @@ link "$DOTFILES_DIR/bin/openapi-checker.sh" "$HOME/.local/bin/openapi-checker.sh
 link "$DOTFILES_DIR/bin/googleapicheck" "$HOME/.local/bin/googleapicheck"
 link "$DOTFILES_DIR/bin/basic-recon.sh" "$HOME/.local/bin/basic-recon.sh"
 
-# GTK (Nemo file manager)
+# GTK3 settings (dark mode + Serialchiller theme for portal file chooser)
 echo "[gtk]"
 mkdir -p "$HOME/.config/gtk-3.0"
-link "$DOTFILES_DIR/gtk/gtk.css" "$HOME/.config/gtk-3.0/gtk.css"
+link "$DOTFILES_DIR/gtk/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
 
 # btop theme
 echo "[btop]"
