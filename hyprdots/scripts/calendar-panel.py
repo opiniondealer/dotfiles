@@ -14,9 +14,6 @@ Usage: calendar-panel.py
 
 import calendar
 import datetime
-import os
-import pathlib
-import signal
 import sys
 
 import gi
@@ -63,7 +60,7 @@ label {{
     color: {FG};
 }}
 .month {{
-    color: {ACCENT};
+    color: {FG};
     font-size: {px(19)}px;
     font-weight: bold;
     letter-spacing: 1px;
@@ -74,6 +71,12 @@ label {{
     font-weight: bold;
 }}
 .weekday {{
+    color: {FG};
+    font-size: {px(10)}px;
+    font-weight: bold;
+    letter-spacing: 0;
+}}
+.weekday-sun {{
     color: {ACCENT};
     font-size: {px(10)}px;
     font-weight: bold;
@@ -126,27 +129,18 @@ button {{
 .btn:hover label {{
     color: {FG};
 }}
+.month-btn {{
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    min-height: 0;
+}}
+.month-btn:hover {{
+    background-color: transparent;
+}}
 """ + NF_CSS
-
-
-PANEL_STATE = "/tmp/opencode-serialchiller-panel.pid"
-
-
-def claim_panel(me: str) -> None:
-    """Close any other panel before showing this one (mutual exclusion)."""
-    try:
-        path = pathlib.Path(PANEL_STATE)
-        if path.exists():
-            name, _, pid = path.read_text().strip().partition(" ")
-            if name != me and pid.isdigit():
-                try:
-                    os.kill(int(pid), signal.SIGTERM)
-                except (ProcessLookupError, PermissionError):
-                    pass
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(f"{me} {os.getpid()}")
-    except Exception:
-        pass
 
 
 class CalendarPanel(Gtk.Application):
@@ -186,13 +180,9 @@ class CalendarPanel(Gtk.Application):
         panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=9)
         panel.set_css_classes(["panel"])
 
-        # --- header: month (left) + year (right) + nav buttons ---
+        # --- header: year on the right (month lives in the nav row below) ---
         head = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        self.month_lbl = Gtk.Label(xalign=0)
-        self.month_lbl.set_css_classes(["month"])
-        self.month_lbl.set_hexpand(True)
-        head.append(self.month_lbl)
-
+        head.set_halign(Gtk.Align.END)
         self.year_lbl = Gtk.Label(xalign=1)
         self.year_lbl.set_css_classes(["year"])
         head.append(self.year_lbl)
@@ -205,11 +195,18 @@ class CalendarPanel(Gtk.Application):
         prev.connect("clicked", lambda *_: self._shift(-1))
         nav.append(prev)
 
-        today_btn = Gtk.Button(label="TODAY")
-        today_btn.set_css_classes(["btn"])
-        today_btn.set_hexpand(True)
-        today_btn.connect("clicked", lambda *_: self._go_today())
-        nav.append(today_btn)
+        # The middle control carries the month name; clicking it jumps back to
+        # the current month. Styled as a plain title (no button chrome, no
+        # hover feedback) so it reads as a label, not a control.
+        self.month_btn = Gtk.Button()
+        self.month_btn.set_css_classes(["month-btn"])
+        self.month_btn.set_hexpand(True)
+        self.month_btn.set_tooltip_text("Click to jump to today")
+        self.month_btn.connect("clicked", lambda *_: self._go_today())
+        self.month_lbl = Gtk.Label()
+        self.month_lbl.set_css_classes(["month"])
+        self.month_btn.set_child(self.month_lbl)
+        nav.append(self.month_btn)
 
         nxt = Gtk.Button(label="\U000f0142")    # chevron-right
         nxt.set_css_classes(["btn", "nf-btn"])
@@ -222,7 +219,8 @@ class CalendarPanel(Gtk.Application):
         wk = Gtk.Grid(column_homogeneous=True, row_spacing=6, column_spacing=4)
         for i, name in enumerate(WEEKDAYS):
             lbl = Gtk.Label(label=name)
-            lbl.set_css_classes(["weekday"])
+            # Sunday (last column) stays accented; other days match the date text.
+            lbl.set_css_classes(["weekday-sun" if name == "SUNDAY" else "weekday"])
             wk.attach(lbl, i, 0, 1, 1)
         panel.append(wk)
 
