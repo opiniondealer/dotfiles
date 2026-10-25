@@ -48,8 +48,8 @@
 
     // ---- Clock ----
     "clock": {
-        "format": "{:%Y/%m/%d — %H.%M}",
-        "tooltip-format": "{:%A, %d %B %Y}",
+        "format": "{:%b %d, %Y — %H.%M}",
+        "tooltip": false,
         "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/calendar-panel.py",
         "on-click-right": "bash -lc /home/abay/.config/hyprdots/scripts/calendar-panel.py"
     },

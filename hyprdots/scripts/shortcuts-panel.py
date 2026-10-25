@@ -12,11 +12,7 @@ Usage: shortcuts-panel.py
 """
 
 import subprocess
-import os
-import pathlib
-import signal
 import sys
-import json
 
 import gi
 
@@ -26,7 +22,14 @@ from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 SCRIPT_DIR = __file__.rsplit("/", 1)[0] if "/" in __file__ else "."
 sys.path.insert(0, SCRIPT_DIR)
-from panel_scale import font_scale, make_px, monitor_size  # noqa: E402
+from panel_scale import (  # noqa: E402
+    font_scale,
+    make_px,
+    monitor_size,
+    register_panel,
+    release_panel,
+    toggle_panel,
+)
 
 BG = "#171717"
 FG = "#fafafa"
@@ -118,31 +121,6 @@ def parse(text: str):
         current[1].append((key, desc))
     return result
 
-
-
-PANEL_STATE = "/tmp/opencode-serialchiller-panel.pid"
-
-
-def claim_panel(me: str) -> None:
-    """Close any other panel before showing this one.
-
-    Panels are mutually exclusive: opening the audio panel dismisses the
-    wifi panel and vice versa. State lives in PANEL_STATE as
-    "<name> <pid>"; a stale pid is simply ignored.
-    """
-    try:
-        path = pathlib.Path(PANEL_STATE)
-        if path.exists():
-            name, _, pid = path.read_text().strip().partition(" ")
-            if name != me and pid.isdigit():
-                try:
-                    os.kill(int(pid), signal.SIGTERM)
-                except (ProcessLookupError, PermissionError):
-                    pass
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(f"{me} {os.getpid()}")
-    except Exception:
-        pass
 
 
 class ShortcutsPanel(Gtk.Application):
