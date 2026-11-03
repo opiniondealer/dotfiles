@@ -22,10 +22,12 @@ SCALE_MAX = 1.9
 
 
 def monitor_size(fallback=(1920, 1080)):
-    """(width, height) of the focused Hyprland monitor.
+    """(width, height) of the focused Hyprland monitor in logical pixels.
 
-    Panels open on the focused monitor, so that is the right reference. Falls
-    back to the given size when Hyprland is not reachable.
+    Panels open on the focused monitor, so that is the right reference.
+    Coordinates are divided by the monitor scale factor so GTK4 (which already
+    applies compositor-level scaling) does not get double-scaled.
+    Falls back to the given size when Hyprland is not reachable.
     """
     try:
         out = subprocess.run(
@@ -36,7 +38,8 @@ def monitor_size(fallback=(1920, 1080)):
             mons = json.loads(out.stdout)
             chosen = next((m for m in mons if m.get("focused")), None) or (mons[0] if mons else None)
             if chosen:
-                return int(chosen["width"]), int(chosen["height"])
+                scale = float(chosen.get("scale", 1.0)) or 1.0
+                return int(round(chosen["width"] / scale)), int(round(chosen["height"] / scale))
     except Exception:
         pass
     return fallback
