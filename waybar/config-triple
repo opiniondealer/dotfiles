@@ -21,7 +21,7 @@
         "custom/l_end", "custom/todoist", "custom/r_end",
         "custom/l_end", "tray", "custom/r_end",
         "custom/l_end", "custom/shortcuts", "network", "bluetooth", "pulseaudio", "custom/r_end",
-        "custom/l_end", "cpu", "memory", "battery", "backlight", "custom/notification", "custom/r_end",
+        "custom/l_end", "cpu", "memory", "battery", "custom/notification", "custom/r_end",
         "custom/power"
     ],
 
