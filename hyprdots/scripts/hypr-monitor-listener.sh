@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# hypr-monitor-listener.sh — listen Hyprland events, trigger auto-workspace.sh
+# hypr-monitor-listener.sh — listen Hyprland events, trigger switch-layout.sh
 
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 SIG="${HYPRLAND_INSTANCE_SIGNATURE:-$(ls -t /run/user/$(id -u)/hypr/ 2>/dev/null | head -1)}"
@@ -8,14 +8,16 @@ SOCK="/run/user/$(id -u)/hypr/${SIG}/.socket2.sock"
 
 [ -S "$SOCK" ] || { echo "socket2 not found: $SOCK"; exit 1; }
 
-# jalanin sekali di awal (sync state)
-"$SCRIPT_DIR/auto-workspace.sh"
+# Jalanin sekali di startup pas boot/login (sync initial state)
+"$SCRIPT_DIR/switch-layout.sh" --force
 
-# listen event streaming
+# Listen event streaming pas colok/cabut kabel
 while IFS= read -r line; do
     case "$line" in
         monitoradded*|monitorremoved*)
-            "$SCRIPT_DIR/auto-workspace.sh"
+            # Delay dikit biar Hyprland selesai handshake EDID
+            sleep 1
+            "$SCRIPT_DIR/switch-layout.sh"
             ;;
     esac
 done < <(socat -U - "UNIX-CONNECT:$SOCK" 2>/dev/null || nc -U "$SOCK")
