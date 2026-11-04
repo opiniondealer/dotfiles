@@ -35,9 +35,9 @@ fi
 # Reload Hyprland config
 hyprctl reload >/dev/null 2>&1
 
-# Reload / restart Waybar
-pkill -SIGUSR2 waybar 2>/dev/null || {
-    pkill waybar 2>/dev/null
-    sleep 0.5
+# Start / Reload Waybar (kill existing first to avoid duplicate bars)
+if pgrep -x waybar >/dev/null; then
+    pkill -SIGUSR2 waybar 2>/dev/null
+else
     setsid waybar >/dev/null 2>&1 &
-}
+fi
