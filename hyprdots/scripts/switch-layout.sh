@@ -35,9 +35,18 @@ fi
 # Reload Hyprland config
 hyprctl reload >/dev/null 2>&1
 
-# Start / Reload Waybar (kill existing first to avoid duplicate bars)
-if pgrep -x waybar >/dev/null; then
-    pkill -SIGUSR2 waybar 2>/dev/null
-else
-    setsid waybar >/dev/null 2>&1 &
-fi
+# Waybar: FULL restart, never SIGUSR2.
+# waybar 0.12 leaks a stale layer surface on every SIGUSR2 reload (the old
+# surface is never unmapped), so repeated hotplug events stack ghost bars on
+# top of the real one. A hard kill + respawn is the only reliable path. The
+# sleep gives the compositor time to destroy the old layer surfaces before the
+# new instance maps its own, otherwise the bar can end up with no exclusive
+# zone (windows overlapping it).
+pkill -x waybar 2>/dev/null
+for _ in $(seq 1 20); do
+    pgrep -x waybar >/dev/null || break
+    sleep 0.1
+done
+pkill -9 -x waybar 2>/dev/null
+sleep 0.3
+setsid waybar >/dev/null 2>&1 &
