@@ -11,7 +11,7 @@
 label,
 button,
 #cpu, #memory, #clock, #network, #bluetooth, #pulseaudio,
-#battery, #backlight, #idle_inhibitor, #custom-power, #custom-shortcuts, #tray, tooltip label {
+#battery, #backlight, #idle_inhibitor, #custom-controlcenter, #custom-shortcuts, #tray, tooltip label {
     font-family: "JetBrainsMono Nerd Font";
 }
 
@@ -126,7 +126,7 @@ tooltip label {
 #custom-weather.showyIcyDay,
 #custom-weather.snowyIcyNight,
 #custom-weather.default,
-#custom-power,
+#custom-controlcenter,
 #backlight,
 #battery,
 #bluetooth,
@@ -137,7 +137,6 @@ tooltip label {
 #memory,
 #mpris,
 #network,
-#custom-power,
 #pulseaudio,
 #taskbar,
 #window,
@@ -186,51 +185,39 @@ tooltip label {
     color: @main-fg;
 }
 
-/* aksen warna: cpu + network biru muda, memory/battery putih */
+/* aksen warna: network/battery biru muda; cpu ikut warna default */
 #cpu{
-    color: @sc-chart1;
+    color: @main-fg;
 }
 #network{
-    color: @sc-chart1;
+    color: @main-fg;
 }
 #memory{
     color: @main-fg;
 }
 #battery{
-    color: @sc-chart1;
+    color: @main-fg;
 }
 #battery.charging,
 #battery.plugged{
-    color: @sc-chart1;
+    color: @main-fg;
 }
 #battery.warning:not(.charging){
-    color: #e0c07b;
+    color: @main-fg;
 }
 #battery.critical:not(.charging){
     color: @sc-destructive;
 }
 
 #custom-shortcuts{
-    color: @sc-muted-fg;
+    color: @main-fg;
     font-size: 15px;
     padding-left: 2px;
     padding-right: 6px;
 }
 #custom-shortcuts:hover{
-    color: @sc-chart1;
-}
-#custom-power{
-    color: @sc-bg;
-    background: @sc-primary;
-    padding-right: 12px;
-    padding-left: 12px;
-    font-size: 15px;
-    border-radius: 5px;
-    margin-top: 6px;
-    margin-bottom: 6px;
-    margin-right: 4px;
-    padding-top: 0px;
-    padding-bottom: 0px;
+    color: @main-fg;
+    opacity: 0.7;
 }
 
 #workspaces,
@@ -276,7 +263,7 @@ tooltip label {
     padding-right: 8px;
 }
 #network { padding-left: 4px; padding-right: 8px; }
-#bluetooth { padding-left: 4px; padding-right: 8px; }
+#bluetooth { padding-left: 4px; padding-right: 4px; }
 #pulseaudio { padding-left: 4px; padding-right: 12px; }
 #cpu { padding-left: 12px; padding-right: 8px; }
 #memory { padding-left: 4px; padding-right: 8px; }
@@ -304,11 +291,12 @@ tooltip label {
 }
 
 /* ===== FINAL SPACING OVERRIDE ===== */
+#custom-controlcenter { padding-left: 4px; padding-right: 12px; }
 #custom-shortcuts { padding-left: 10px; padding-right: 6px; margin: 6px 0 6px 0; }
 #network { padding-left: 8px; padding-right: 6px; margin: 6px 0 6px 0; }
-#bluetooth { padding-left: 4px; padding-right: 8px; margin: 6px 0 6px 0; }
+#bluetooth { padding-left: 4px; padding-right: 4px; margin: 6px 0 6px 0; }
 #pulseaudio { padding-left: 2px; padding-right: 12px; margin: 6px 0 6px 0; }
-#cpu { padding-left: 16px; padding-right: 6px; margin: 6px 0 6px 0; }
+#cpu { padding-left: 4px; padding-right: 6px; margin: 6px 0 6px 0; }
 #memory { padding-left: 6px; padding-right: 6px; margin: 6px 0 6px 0; }
 #battery { padding-left: 6px; padding-right: 6px; margin: 6px 0 6px 0; }
 #backlight { padding-left: 6px; padding-right: 6px; margin: 6px 0 6px 0; }
@@ -343,9 +331,9 @@ tooltip label {
     -gtk-icon-effect: highlight;
 }
 
-/* bluetooth: biru kalau nyala/connected */
+/* bluetooth: putih kalau nyala/connected, abu kalau off */
 #bluetooth{
-    color: @sc-muted-fg;
+    color: @main-fg;
 }
 
 /* ===== todoist pill (left of the tray) ===== */
@@ -367,9 +355,12 @@ tooltip label {
 }
 #bluetooth.connected,
 #bluetooth.on{
-    color: @sc-chart1;
+    color: @main-fg;
 }
 #bluetooth.disabled,
-#bluetooth.off{
+#bluetooth.off,
+#bluetooth.discoverable,
+#bluetooth.discovering,
+#bluetooth.pairable{
     color: @sc-muted-fg;
 }

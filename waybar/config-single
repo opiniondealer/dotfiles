@@ -12,33 +12,32 @@
     "margin-right": 8,
 
     "modules-left": [
-        "custom/l_end", "hyprland/workspaces", "custom/r_end"
-    ],
-    "modules-center": [
         "custom/l_end", "clock", "custom/r_end"
     ],
+    "modules-center": [
+        "custom/l_end", "hyprland/workspaces", "custom/r_end"
+    ],
     "modules-right": [
-        // "custom/l_end", "custom/todoist", "custom/r_end",
+        "custom/l_end", "custom/todoist", "custom/r_end",
         "custom/l_end", "tray", "custom/r_end",
-        "custom/l_end", "custom/shortcuts", "network", "bluetooth", "pulseaudio", "custom/r_end",
-        "custom/l_end", "cpu", "memory", "battery", "custom/notification", "custom/r_end",
-        "custom/power"
+        "custom/l_end", "custom/shortcuts", "network", "bluetooth", "memory", "cpu", "battery", "custom/notification", "custom/controlcenter", "custom/r_end"
     ],
 
-    // ---- Power menu (wlogout) ----
-    "custom/power": {
-        "format": "󰐥",
-        "tooltip": false,
-        "on-click": "wlogout"
+    // ---- Control Center (quickshell) ----
+    "custom/controlcenter": {
+        "format": "󰒓",
+        "tooltip": "Control Center",
+        "on-click": "/usr/bin/quickshell ipc -p $HOME/.config/quickshell-controlcenter call controlcenter open"
     },
 
     // ---- Workspaces ----
     "hyprland/workspaces": {
-        "format": "{name}",
+        "format": "{icon}",
         "format-icons": {
-            "active": "󱨇",
-            "default": "󰧟",
-            "empty": "󰧟"
+            "active": "\u25CF",
+            "default": "\u25CB",
+            "empty": "\u25CB",
+            "urgent": "\u25CE"
         },
         "disable-scroll": true,
         "all-outputs": false,
@@ -49,7 +48,7 @@
 
     // ---- Clock ----
     "clock": {
-        "format": "{:%a %b %d, %Y — %H.%M}",
+        "format": "{:%H.%M | %b %d, %Y}",
         "tooltip": false,
         "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/calendar-panel.py",
         "on-click-right": "bash -lc /home/abay/.config/hyprdots/scripts/calendar-panel.py"
@@ -73,26 +72,11 @@
         "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/shortcuts-panel.py"
     },
 
-    // ---- Notification (swaync) ----
+    // ---- Notification bell (opens Control Center at the notification list) ----
     "custom/notification": {
-        "tooltip": false,
-        "format": "{icon}",
-        "format-icons": {
-            "notification": "󰂚<span foreground='#ff6467'><sup>●</sup></span>",
-            "none": "󰂚",
-            "dnd-notification": "󰂛<span foreground='#ff6467'><sup>●</sup></span>",
-            "dnd-none": "󰂛",
-            "inhibited-notification": "󰂚<span foreground='#ff6467'><sup>●</sup></span>",
-            "inhibited-none": "󰂚",
-            "dnd-inhibited-notification": "󰂛<span foreground='#ff6467'><sup>●</sup></span>",
-            "dnd-inhibited-none": "󰂛"
-        },
-        "return-type": "json",
-        "exec-if": "which swaync-client",
-        "exec": "swaync-client -swb",
-        "on-click": "swaync-client -t -sw",
-        "on-click-right": "swaync-client -d -sw",
-        "escape": true
+        "format": "󰂚",
+        "tooltip": "Notifications",
+        "on-click": "/usr/bin/quickshell ipc -p $HOME/.config/quickshell-controlcenter call controlcenter toggleNotifications"
     },
 
     // ---- Todoist tasks (rotating) ----
