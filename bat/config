@@ -1,0 +1,5 @@
+# bat config — Serialchiller
+--theme="Serialchiller"
+--style=numbers,grid,changes
+--paging=never
+--italic-text=always

@@ -19,6 +19,7 @@ RPROMPT='%(?..%F{#ff6467}[%?]%f )%F{#a1a1a1}%*%f'
 
 # Aliases
 alias ll="ls -lah"
+alias cat="batcat --style=plain --paging=never"
 alias humble="python3 $HOME/tools/humble/humble.py"
 alias testssl.sh="bash $HOME/tools/testssl.sh/testssl.sh"
 alias webroot="cd /var/www/html"
