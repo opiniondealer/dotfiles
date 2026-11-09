@@ -158,3 +158,42 @@ install before the setup is fully functional.
 
 The font packages are `ttf-jetbrains-mono-nerd` and `fonts-materialdesignicons-webfont`
 on Debian.
+
+## Testing the install
+
+`./test-install.sh` builds a Debian trixie container, runs `install.sh` as a
+fresh user, and checks that the result actually works. Requires Docker.
+
+It verifies:
+
+- `install.sh` exits 0 on a clean `$HOME`, and again on a second run
+- no `__HOME__` / `__WALLPAPER__` placeholders survive, and no `/home/<owner>`
+  paths leak into the rendered config
+- Waybar loads the config under a headless Sway compositor, stays up, and
+  renders (a screenshot is taken as proof)
+- every module is loaded individually to catch hardware-dependent crashes
+- fastfetch renders its config without error
+
+It cannot verify anything that needs a real desktop session: how the bar looks
+with proper fonts, the wallpaper, the lock screen, Hyprland itself, the
+Quickshell panels, or the kitty image-protocol logo. Those still need a manual
+pass after install.
+
+Known failure built into the test: `bluetooth` crashes Waybar in the container
+because there is no `/dev/rfkill` — see the section above. The test asserts that
+this is the *only* module that fails and that the bar stays up without it.
+
+## Known issue: no Bluetooth adapter kills the whole bar
+
+Waybar 0.12.0 (the version in Debian trixie) **segfaults** when the `bluetooth`
+module is enabled and the machine has no `/dev/rfkill`, which takes the entire
+bar down with it. This affects VMs, containers, and laptops with Bluetooth
+disabled in the BIOS. Verified by running the config under a headless Sway
+container: with the module present Waybar dies, without it stays up.
+
+If your machine has no Bluetooth adapter, remove `"bluetooth"` from
+`modules-right` in `waybar/config-single` (and `config-triple`), or replace it
+with a `custom/bluetooth` module that shells out to `bluetoothctl` behind an
+existence check. Waybar 0.13 and newer are not affected.
+
+There is a matching note in `waybar/config-single` next to the module.

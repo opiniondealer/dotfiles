@@ -108,6 +108,9 @@
     },
 
     // ---- Bluetooth ----
+    // Waybar 0.12.0 segfaults on this module when the machine has no
+    // /dev/rfkill (VM, container, BT disabled in BIOS) and takes the whole
+    // bar down. Drop "bluetooth" from modules-right on such a machine.
     "bluetooth": {
         "format": "",
         "on-click": "/usr/bin/quickshell ipc -p $HOME/.config/quickshell-controlcenter call bluetooth toggle",
