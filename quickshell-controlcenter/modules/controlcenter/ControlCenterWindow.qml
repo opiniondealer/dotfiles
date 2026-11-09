@@ -206,7 +206,7 @@ PanelWindow {
                             columnSpacing: 8
 
                             QuickToggle { Layout.fillWidth: true; icon: "󰖩"; label: "Wi-Fi"; subLabel: root.network.connected ? root.network.ssid : "Off"; active: root.network.wifiEnabled; activeColor: root.cPrimary; onClicked: root.network.toggleWifi() }
-                            QuickToggle { Layout.fillWidth: true; icon: "󰂯"; label: "Bluetooth"; subLabel: root.bluetooth.powered ? "On" : "Off"; active: root.bluetooth.powered; activeColor: root.cPrimary; onClicked: root.bluetooth.togglePower() }
+                            QuickToggle { Layout.fillWidth: true; icon: "󰂯"; label: "Bluetooth"; subLabel: root.bluetooth.softBlocked ? "Blocked" : (root.bluetooth.powered ? "On" : "Off"); active: root.bluetooth.powered; activeColor: root.cPrimary; onClicked: root.bluetooth.togglePower() }
                             QuickToggle { Layout.fillWidth: true; icon: "󰔎"; label: "Do Not Disturb"; subLabel: root.notifs.dnd ? "On" : "Off"; active: root.notifs.dnd; activeColor: pywal.warning; onClicked: root.notifs.toggleDnd() }
                             QuickToggle { Layout.fillWidth: true; icon: "󰾴"; label: "Gaming Mode"; subLabel: root.gamingMode.enabled ? "Performance" : "Balanced"; active: root.gamingMode.enabled; activeColor: pywal.success; onClicked: root.gamingMode.toggle() }
                         }

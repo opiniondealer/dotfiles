@@ -16,6 +16,7 @@ PanelWindow {
     id: root
 
     readonly property var pywal: QsServices.Pywal
+    readonly property var bluetooth: QsServices.Bluetooth
     readonly property var adapter: Bluetooth.defaultAdapter
 
     // Connected first, then paired, then by name.
@@ -140,9 +141,12 @@ PanelWindow {
 
                         Text {
                             readonly property var connected: root.devices.filter(d => d.connected)
-                            text: connected.length > 0
-                                ? (connected[0].name ?? connected[0].alias ?? "Device")
-                                : "No device connected"
+                            text: {
+                                if (root.bluetooth.softBlocked) return "Blocked by rfkill"
+                                if (connected.length > 0)
+                                    return connected[0].name ?? connected[0].alias ?? "Device"
+                                return root.adapter?.enabled ? "No device connected" : "Bluetooth off"
+                            }
                             font.family: "JetBrainsMono Nerd Font"
                             font.pixelSize: 11
                             color: root.cOnSurfaceVariant
@@ -172,7 +176,7 @@ PanelWindow {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: if (root.adapter) root.adapter.enabled = !root.adapter.enabled
+                            onClicked: root.bluetooth.togglePower()
                         }
                     }
                 }
