@@ -84,7 +84,7 @@
         "return-type": "json",
         "format": "| {}",
         "tooltip": true,
-        "on-click": "bash -lc '$HOME/apps/todoist.AppImage >/dev/null 2>&1 &'"
+        "on-click": "bash -lc 'APP=$HOME/apps/todoist.AppImage; if [ -x $APP ]; then $APP >/dev/null 2>&1 & elif command -v todoist >/dev/null 2>&1; then todoist >/dev/null 2>&1 & else notify-send Todoist No-Todoist-app-found; fi'"
     },
 
     // ---- Tray ----
