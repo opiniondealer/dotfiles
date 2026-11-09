@@ -79,14 +79,14 @@ if [ -f "$HOME/.config/btop/btop.conf" ]; then
     echo "  set color_theme = serialchiller in btop.conf"
 fi
 
-# Macchina
-echo "[macchina]"
-if command -v macchina >/dev/null 2>&1; then
-    mkdir -p "$HOME/.config/macchina/themes"
-    link "$DOTFILES_DIR/macchina/macchina.toml" "$HOME/.config/macchina/macchina.toml"
-    link "$DOTFILES_DIR/macchina/themes/serialchiller.toml" "$HOME/.config/macchina/themes/serialchiller.toml"
+# fastfetch
+echo "[fastfetch]"
+if command -v fastfetch >/dev/null 2>&1; then
+    mkdir -p "$HOME/.config/fastfetch"
+    link "$DOTFILES_DIR/fastfetch/config.jsonc" "$HOME/.config/fastfetch/config.jsonc"
+    link "$DOTFILES_DIR/fastfetch/anya.png" "$HOME/.config/fastfetch/anya.png"
 else
-    echo "  macchina not found, skipped"
+    echo "  fastfetch not found, skipped"
 fi
 
 # Hyprland

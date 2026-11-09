@@ -1,3 +1,0 @@
-# macchina config
-theme = "serialchiller"
-show = ["Host", "Kernel", "Packages", "LocalIP", "Uptime", "Memory"]

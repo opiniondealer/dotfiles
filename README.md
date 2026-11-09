@@ -3,7 +3,7 @@
 Personal configuration for a Hyprland desktop on Debian: Hyprland window
 manager, Waybar bar, Quickshell control center, and the CLI/TUI tools around
 them. Theme is "Serialchiller" (neutral dark, blue accent) shared across
-Waybar, Kitty, btop, macchina and GTK.
+Waybar, Kitty, btop, fastfetch and GTK.
 
 ## What's included
 
@@ -26,7 +26,7 @@ Waybar, Kitty, btop, macchina and GTK.
 - **git/.gitconfig** - Git config
 - **bin/** - Custom scripts (openapi-checker.sh, googleapicheck, basic-recon.sh)
 - **btop/** - btop theme "serialchiller"
-- **macchina/** - Macchina system info theme "serialchiller"
+- **fastfetch/** - fastfetch config + the image used as its logo
 
 ### Legacy
 
@@ -119,6 +119,7 @@ systemctl --user enable --now quickshell-controlcenter.service
 - **Nemo** - file manager
 - **JetBrainsMono Nerd Font** - UI font
 - **Material Design Icons** font - panel glyphs
-- [btop](https://github.com/aristocratos/btop), [macchina](https://github.com/Macchina-CLI/macchina) - optional, for the serialchiller themes
+- [btop](https://github.com/aristocratos/btop) - optional, for the serialchiller theme
+- [fastfetch](https://github.com/fastfetch-cli/fastfetch) - system info on shell start
 
 `hypridle` is present in the repo but currently masked on this machine.
