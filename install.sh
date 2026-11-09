@@ -105,10 +105,14 @@ for f in autocmds keymaps lazy options; do
     link "$DOTFILES_DIR/nvim/lua/config/$f.lua" "$HOME/.config/nvim/lua/config/$f.lua"
 done
 for f in all-themes disable-news-alert snacks-animated-scrolling-off; do
-    link "$DOTFILES_DIR/nvim/lua/lua/plugins/$f.lua" "$HOME/.config/nvim/lua/lua/plugins/$f.lua"
+    link "$DOTFILES_DIR/nvim/lua/plugins/$f.lua" "$HOME/.config/nvim/lua/plugins/$f.lua"
 done
 link "$DOTFILES_DIR/nvim/plugin/after/transparency.lua" "$HOME/.config/nvim/plugin/after/transparency.lua"
-need nvim
+# nvim can come from the system or from ~/apps/nvim (the alias in .zshrc
+# prefers the local build when it exists).
+if ! command -v nvim >/dev/null 2>&1 && [ ! -x "$HOME/apps/nvim/bin/nvim" ]; then
+    MISSING+=("nvim (or a build in ~/apps/nvim/bin)")
+fi
 
 # --- git ---------------------------------------------------------------
 

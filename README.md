@@ -20,7 +20,7 @@ Waybar, Kitty, btop, fastfetch and GTK.
 
 ### CLI / TUI
 
-- **.zshrc** - Shell config (Oh My Zsh, Powerlevel10k, aliases, functions, PATH)
+- **.zshrc** - Shell config (Oh My Zsh, custom prompt, aliases, functions, PATH)
 - **kitty/** - Kitty terminal config + `serialchiller.conf` theme
 - **nvim/** - Neovim config (LazyVim + lazy.nvim)
 - **git/.gitconfig** - Git config

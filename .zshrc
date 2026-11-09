@@ -23,7 +23,10 @@ alias cat="batcat --style=plain --paging=never"
 alias humble="python3 $HOME/tools/humble/humble.py"
 alias testssl.sh="bash $HOME/tools/testssl.sh/testssl.sh"
 alias webroot="cd /var/www/html"
-alias vim="$HOME/apps/nvim/bin/nvim"
+if [ -x "$HOME/apps/nvim/bin/nvim" ]; then
+    alias vim="$HOME/apps/nvim/bin/nvim"
+    export PATH="$HOME/apps/nvim/bin:$PATH"
+fi
 
 # Navigation
 alias ..="cd .."
@@ -79,7 +82,7 @@ export EDITOR='nvim'
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 # bun completions
-[ -s "/home/abay/.bun/_bun" ] && source "/home/abay/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
@@ -91,4 +94,3 @@ export ANDROID_HOME="$HOME/android-sdk"
 export ANDROID_SDK_ROOT="$HOME/android-sdk"
 export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin"
 
-export PATH="$HOME/apps/macchina/target/release:$PATH"
