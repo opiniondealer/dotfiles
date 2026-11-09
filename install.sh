@@ -129,6 +129,10 @@ echo "[swaync]"
 link "$DOTFILES_DIR/swaync/config.json" "$HOME/.config/swaync/config.json"
 link "$DOTFILES_DIR/swaync/style.css" "$HOME/.config/swaync/style.css"
 
+# Quickshell Control Center (standalone, single symlink to whole dir)
+echo "[quickshell-controlcenter]"
+link "$DOTFILES_DIR/quickshell-controlcenter" "$HOME/.config/quickshell-controlcenter"
+
 # GTK theme for yad (Serialchiller)
 echo "[gtk-theme]"
 mkdir -p "$HOME/.themes/Serialchiller/gtk-3.0"
