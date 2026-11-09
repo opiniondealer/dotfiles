@@ -110,7 +110,8 @@
     // ---- Bluetooth ----
     "bluetooth": {
         "format": "",
-        "on-click": "bash -lc '~/.config/hyprdots/scripts/bluetooth-panel.py'",
+        "on-click": "/usr/bin/quickshell ipc -p $HOME/.config/quickshell-controlcenter call bluetooth toggle",
+        "on-click-right": "bash -lc '$HOME/.config/hyprdots/scripts/bluetooth-panel.py'",
         "format-connected": "",
         "format-disabled": "",
         "format-off": "",

@@ -69,5 +69,17 @@ ShellRoot {
         }
     }
 
+    BluetoothPanel {
+        id: bt
+
+        IpcHandler {
+            target: "bluetooth"
+
+            function toggle(): void { bt.toggle() }
+            function open(): void { bt.shouldShow = true }
+            function close(): void { bt.shouldShow = false }
+        }
+    }
+
     Component.onCompleted: QsServices.Logger.info("Shell", "Control Center shell loaded")
 }
