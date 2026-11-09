@@ -259,7 +259,25 @@ PanelWindow {
                             readonly property bool isActive: modelData.active
                             readonly property string ssid: modelData.ssid
                             readonly property bool isSaved: root.network.isNetworkSaved(ssid)
-                            readonly property bool canConnect: true
+
+                            // Row click never disconnects: clicking the network
+                            // you are already on must not drop your session.
+                            // Only the explicit action button tears it down.
+                            function activate(): void {
+                                if (isActive) return
+                                if (isSaved || !modelData.isSecure) {
+                                    root.network.connectToNetwork(ssid, "")
+                                } else {
+                                    passwordDialog.networkSSID = ssid
+                                    passwordDialog.open()
+                                }
+                            }
+
+                            // Action button: also handles disconnect.
+                            function activateOrDisconnect(): void {
+                                if (isActive) root.network.disconnectFromNetwork()
+                                else activate()
+                            }
 
                             width: networkList.width
                             height: 52
@@ -357,25 +375,21 @@ PanelWindow {
                                         anchors.fill: parent
                                         hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            if (netItem.isActive) {
-                                                root.network.disconnectFromNetwork()
-                                            } else if (netItem.isSaved || !netItem.modelData.isSecure) {
-                                                root.network.connectToNetwork(netItem.ssid, "")
-                                            } else {
-                                                passwordDialog.networkSSID = netItem.ssid
-                                                passwordDialog.open()
-                                            }
-                                        }
+                                        onClicked: netItem.activateOrDisconnect()
                                     }
                                 }
                             }
 
+                            // z: -1 keeps this behind the action button so the
+                            // button keeps its own hover feedback; clicks pass
+                            // down through the non-interactive label items.
                             MouseArea {
                                 id: itemArea
                                 anchors.fill: parent
                                 hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
                                 z: -1
+                                onClicked: netItem.activate()
                             }
                         }
                     }
