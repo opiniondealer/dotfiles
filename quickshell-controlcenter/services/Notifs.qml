@@ -269,6 +269,21 @@ Singleton {
 
             QsServices.Logger.debug("Notifs", `Notification closed (kept in history): ${summary}`)
         }
+
+        // Explicit user dismissal: close() only flags the entry, and the
+        // center lists everything from the last 24h regardless of `closed`,
+        // so the card stayed on screen. Drop it from the model as well.
+        function dismiss() {
+            closed = true;
+            try {
+                if (notification && typeof notification.dismiss === "function")
+                    notification.dismiss();
+            } catch (e) {
+                QsServices.Logger.debug("Notifs", `dismiss failed: ${e}`)
+            }
+            root.notifications = root.notifications.filter(n => n !== notifWrapper)
+            QsServices.Logger.debug("Notifs", `Notification dismissed: ${summary}`)
+        }
         
         function invokeAction(actionId) {
             const action = actions.find(a => a.identifier === actionId);

@@ -165,7 +165,12 @@ Item {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if (root.notification && root.notification.close)
+                        if (!root.notification) return
+                        // Prefer the wrapper's dismiss(): it also removes the
+                        // entry from the model, which close() never did.
+                        if (typeof root.notification.dismiss === "function")
+                            root.notification.dismiss()
+                        else if (typeof root.notification.close === "function")
                             root.notification.close()
                     }
                 }
