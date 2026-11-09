@@ -291,6 +291,8 @@ tooltip label {
 }
 
 /* ===== FINAL SPACING OVERRIDE ===== */
+/* clock + todoist satu grup: rapatkan tanpa mengubah jarak pill lain */
+#clock { padding-right: 0px; }
 #custom-controlcenter { padding-left: 4px; padding-right: 12px; }
 #custom-shortcuts { padding-left: 10px; padding-right: 6px; margin: 6px 0 6px 0; }
 #network { padding-left: 8px; padding-right: 6px; margin: 6px 0 6px 0; }
@@ -342,10 +344,10 @@ tooltip label {
 #custom-todoist {
     font-family: "JetBrainsMono Nerd Font";
     color: @main-fg;
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left: 6px;
+    padding-right: 10px;
     margin: 6px 0 6px 0;
-    min-width: 190px;
+    min-width: 0px;
 }
 #custom-todoist.empty {
     color: @sc-muted-fg;
