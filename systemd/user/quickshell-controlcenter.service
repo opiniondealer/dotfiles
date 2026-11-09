@@ -1,0 +1,16 @@
+[Unit]
+Description=Quickshell Control Center
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+# Quickshell applies Wayland scaling itself, so the global QT_SCALE_FACTOR=2
+# from hyprland.conf (or the user environment) would double it.
+UnsetEnvironment=QT_SCALE_FACTOR GDK_SCALE
+Environment=QT_AUTO_SCREEN_SCALE_FACTOR=0
+ExecStart=/usr/bin/quickshell -p %h/.config/quickshell-controlcenter
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target

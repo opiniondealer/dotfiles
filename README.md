@@ -27,6 +27,7 @@ Waybar, Kitty, btop, fastfetch and GTK.
 - **bin/** - Custom scripts (openapi-checker.sh, googleapicheck, basic-recon.sh)
 - **btop/** - btop theme "serialchiller"
 - **fastfetch/** - fastfetch config + the image used as its logo
+- **systemd/user/** - systemd user units (Quickshell control center)
 
 ### Legacy
 
@@ -81,28 +82,59 @@ systemctl --user restart quickshell-controlcenter
 ## Install
 
 ```bash
-git clone git@github.com:opiniondealer/dotfiles.git
+git clone https://github.com/opiniondealer/dotfiles.git
 cd dotfiles
-chmod +x install.sh
 ./install.sh
 ```
 
-Existing configs are backed up to `~/.dotfiles-backup/`.
+Existing files are backed up to `~/.dotfiles-backup/<timestamp>/` before being
+replaced. The script is idempotent: re-running it only relinks and re-renders.
 
-`install.sh` symlinks each config into place. Two things it deliberately does
-not touch:
+### Placeholders
 
-- `hypr/monitors.conf` and `waybar/config` are runtime symlinks that
-  `switch-layout.sh` rewrites whenever the monitor count changes, so they stay
-  out of git.
-- `~/.config/quickshell-controlcenter` is linked as a whole directory, so new
-  QML files need no `install.sh` change.
+Some configs need absolute paths and their consumers do not expand `~` or
+`$HOME` (fastfetch, wofi) or must point at files specific to the machine
+(wallpapers). Those files ship with placeholders instead of hardcoded paths:
 
-After install, enable the Quickshell service once:
+| Placeholder | Replaced with |
+|-------------|---------------|
+| `__HOME__` | `$HOME` |
+| `__WALLPAPER__` | `~/.cache/current_wallpaper` if present, otherwise a generated 1920x1080 `#171717` PNG |
+
+Rendered copies go to `~/.config/dotfiles-rendered/` and are symlinked into
+place, so the repository itself stays portable. Edit the source file in the
+repo, then re-run `./install.sh` to re-render.
+
+Affected files: `fastfetch/config.jsonc`, `wofi/config`, `wofi/drun.conf`,
+`waybar/config-single`, `waybar/config-triple`, `hypr/hyprlock.conf`,
+`hypr/hyprpaper.conf`.
+
+### Runtime symlinks
+
+Two paths are owned by `switch-layout.sh` and rewritten whenever the monitor
+count changes:
+
+- `~/.config/hypr/monitors.conf`
+- `~/.config/waybar/config`
+
+`install.sh` points both at the single-monitor profile on a fresh install and
+leaves them alone on a re-run. They are tracked in git but only as symlinks.
+
+### Quickshell service
+
+The systemd unit ships in `systemd/user/quickshell-controlcenter.service` and is
+linked to `~/.config/systemd/user/`. The script enables and starts it when the
+current user actually owns the running systemd user session; otherwise it prints
+the command to run after logging in:
 
 ```bash
 systemctl --user enable --now quickshell-controlcenter.service
 ```
+
+### Missing commands
+
+At the end the script lists any binaries it did not find, so you know what to
+install before the setup is fully functional.
 
 ## Prerequisites
 
@@ -123,3 +155,6 @@ systemctl --user enable --now quickshell-controlcenter.service
 - [fastfetch](https://github.com/fastfetch-cli/fastfetch) - system info on shell start
 
 `hypridle` is present in the repo but currently masked on this machine.
+
+The font packages are `ttf-jetbrains-mono-nerd` and `fonts-materialdesignicons-webfont`
+on Debian.
