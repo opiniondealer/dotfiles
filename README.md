@@ -1,18 +1,62 @@
 # dotfiles
 
-Personal configuration files for zsh, kitty, nvim, git, btop, and macchina.
+Personal configuration for a Hyprland desktop on Debian: Hyprland window
+manager, Waybar bar, Quickshell control center, and the CLI/TUI tools around
+them. Theme is "Serialchiller" (neutral dark, blue accent) shared across
+Waybar, Kitty, btop, macchina and GTK.
 
 ## What's included
 
+### Desktop
+
+- **hypr/** - Hyprland config: keybinds, monitors (single/triple profiles),
+  workspaces, hyprpaper, hyprlock, hypridle, GTK theme
+- **waybar/** - Bar config for single (`config-single`) and triple
+  (`config-triple`) monitor setups, plus `style.css` and Serialchiller theme
+- **hyprdots/scripts/** - Helper scripts and GTK4 panels the bar calls
+- **wofi/** - Launcher, bound to `SUPER+Space`
+- **quickshell-controlcenter/** - Standalone Quickshell panel: control center,
+  Bluetooth popup, WiFi popup with password dialog, notification daemon
+
+### CLI / TUI
+
 - **.zshrc** - Shell config (Oh My Zsh, Powerlevel10k, aliases, functions, PATH)
-- **zsh/.p10k.zsh** - Powerlevel10k prompt config (rainbow, Nerd Font icons)
-- **kitty/** - Kitty terminal config + VSCode Dark theme, plus `serialchiller.conf` (selectable via `kitty +kitten themes`)
+- **kitty/** - Kitty terminal config + `serialchiller.conf` theme
 - **nvim/** - Neovim config (LazyVim + lazy.nvim)
 - **git/.gitconfig** - Git config
 - **bin/** - Custom scripts (openapi-checker.sh, googleapicheck, basic-recon.sh)
-- **gtk/gtk.css** - Dark theme for Nemo file manager (VSCode Dark)
-- **btop/** - btop theme "serialchiller" (VSCode Dark palette)
-- **macchina/** - Macchina system info theme "serialchiller" + default config
+- **btop/** - btop theme "serialchiller"
+- **macchina/** - Macchina system info theme "serialchiller"
+
+### Legacy
+
+- **swaync/** - Notification daemon config, kept for reference. It is masked:
+  Quickshell owns `org.freedesktop.Notifications` now.
+
+## Quickshell panels
+
+`quickshell-controlcenter/` runs as a systemd user service and provides:
+
+| Panel | Opened by | What it does |
+|-------|-----------|--------------|
+| Control center | `SUPER+C`, Waybar gear | Clock, quick toggles (WiFi, Bluetooth, DND, Gaming Mode), volume/brightness sliders, CPU/RAM/DISK, notifications |
+| Bluetooth | Waybar bluetooth icon | Adapter power (unblocks rfkill first), scan, device list, connect/disconnect |
+| WiFi | Waybar network icon | Radio toggle, scan, network list, connect to saved/open networks, password dialog for new secured ones |
+
+IPC targets, useful in keybinds and scripts:
+
+```bash
+quickshell ipc -p ~/.config/quickshell-controlcenter call controlcenter toggle
+quickshell ipc -p ~/.config/quickshell-controlcenter call bluetooth toggle
+quickshell ipc -p ~/.config/quickshell-controlcenter call network toggle
+```
+
+Service management:
+
+```bash
+systemctl --user status quickshell-controlcenter
+systemctl --user restart quickshell-controlcenter
+```
 
 ## Custom commands
 
@@ -43,16 +87,38 @@ chmod +x install.sh
 ./install.sh
 ```
 
-Existing configs will be backed up to `~/.dotfiles-backup/`.
+Existing configs are backed up to `~/.dotfiles-backup/`.
 
-Custom scripts are linked into `~/.local/bin` (already in PATH via `.zshrc`).
+`install.sh` symlinks each config into place. Two things it deliberately does
+not touch:
+
+- `hypr/monitors.conf` and `waybar/config` are runtime symlinks that
+  `switch-layout.sh` rewrites whenever the monitor count changes, so they stay
+  out of git.
+- `~/.config/quickshell-controlcenter` is linked as a whole directory, so new
+  QML files need no `install.sh` change.
+
+After install, enable the Quickshell service once:
+
+```bash
+systemctl --user enable --now quickshell-controlcenter.service
+```
 
 ## Prerequisites
 
-- zsh + [Oh My Zsh](https://ohmyz.sh/)
-- [Kitty](https://sw.kovidgoyal.net/kitty/)
-- [Neovim](https://neovim.io/) + [LazyVim](https://www.lazyvim.org/)
-- [Nemo](https://github.com/linuxmint/nemo) file manager
-- [btop](https://github.com/aristocratos/btop) (optional, for serialchiller theme)
-- [macchina](https://github.com/Macchina-CLI/macchina) (optional, for serialchiller theme)
-- git
+- Hyprland on Wayland
+- **Waybar** - bar
+- **Quickshell** - control center and panels (Qt 6)
+- **Wofi** - launcher
+- **Kitty** - terminal
+- **Neovim** + [LazyVim](https://www.lazyvim.org/)
+- **hyprpaper**, **hyprlock** - wallpaper and lock screen
+- **nmcli** (NetworkManager) - WiFi in both Waybar and the Quickshell panel
+- **blueman** - `blueman-manager`, opened from the Bluetooth panel footer
+- **brightnessctl**, **pactl** (PipeWire/PulseAudio) - sliders and media keys
+- **Nemo** - file manager
+- **JetBrainsMono Nerd Font** - UI font
+- **Material Design Icons** font - panel glyphs
+- [btop](https://github.com/aristocratos/btop), [macchina](https://github.com/Macchina-CLI/macchina) - optional, for the serialchiller themes
+
+`hypridle` is present in the repo but currently masked on this machine.
