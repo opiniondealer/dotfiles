@@ -37,13 +37,21 @@ Singleton {
     }
 
     function powerOn(): void {
-        if (!adapter || busy) return
-        busy = true
+        if (!adapter) return
         lastError = ""
         // /dev/rfkill is group netdev with an rw ACL for this user, so the
         // unblock needs no privilege escalation (pkexec has no TTY here).
-        if (softBlocked) rfkillUnblock.running = true
-        else adapter.enabled = true
+        if (softBlocked) {
+            if (busy) return
+            busy = true
+            rfkillUnblock.running = true
+        } else {
+            // Plain power-on has no async step to clear `busy`, so it must
+            // never set it: the first click would latch busy forever and
+            // every later click returned early.
+            busy = false
+            adapter.enabled = true
+        }
     }
 
     Component.onCompleted: refreshBlockState()
