@@ -1,10 +1,11 @@
-// WiFi popup panel (phase 1: read, connect to saved, disconnect).
-// No password entry yet; unsaved secured networks are shown but require
-// phase 2. Toggled over IPC:
+// WiFi popup panel: adapter toggle, scan, network list, connect/disconnect,
+// and a password dialog for unsaved secured networks. Hover auto-close is
+// suppressed while the dialog is open, and Escape closes the dialog first.
 //   quickshell ipc -p ~/.config/quickshell-controlcenter call network toggle
 
 import QtQuick 6.8
 import QtQuick.Layouts 6.8
+import QtQuick.Controls 6.8
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -31,6 +32,7 @@ PanelWindow {
     readonly property color cOnSurfaceVariant: pywal.onSurfaceMuted
 
     property bool shouldShow: false
+    property bool passwordOpen: false
 
     screen: {
         const fm = QsServices.Hypr.focusedMonitor
@@ -66,23 +68,33 @@ PanelWindow {
         id: panelContent
         anchors.fill: parent
         focus: true
-        Keys.onEscapePressed: root.shouldShow = false
+        Keys.onEscapePressed: {
+            if (passwordDialog.isOpen) passwordDialog.close()
+            else root.shouldShow = false
+        }
 
         HoverHandler {
             id: hoverHandler
             onHoveredChanged: {
                 if (hovered) closeTimer.stop()
-                else if (root.shouldShow) closeTimer.restart()
+                else if (root.shouldShow && !root.passwordOpen) closeTimer.restart()
             }
         }
 
         Timer {
             id: closeTimer
             interval: 400
-            onTriggered: if (!hoverHandler.hovered) root.shouldShow = false
+            onTriggered: if (!hoverHandler.hovered && !root.passwordOpen) root.shouldShow = false
         }
 
-        MouseArea { anchors.fill: parent; z: -1; onClicked: root.shouldShow = false }
+        MouseArea {
+            anchors.fill: parent
+            z: -1
+            onClicked: {
+                if (passwordDialog.isOpen) passwordDialog.close()
+                else root.shouldShow = false
+            }
+        }
 
         Rectangle {
             id: panel
@@ -247,7 +259,7 @@ PanelWindow {
                             readonly property bool isActive: modelData.active
                             readonly property string ssid: modelData.ssid
                             readonly property bool isSaved: root.network.isNetworkSaved(ssid)
-                            readonly property bool canConnect: isActive || isSaved || !modelData.isSecure
+                            readonly property bool canConnect: true
 
                             width: networkList.width
                             height: 52
@@ -302,7 +314,7 @@ PanelWindow {
                                         text: {
                                             if (netItem.isActive) return "Connected"
                                             if (netItem.isSaved) return "Saved · " + netItem.modelData.strength + "%"
-                                            if (netItem.modelData.isSecure) return "Password required"
+                                            if (netItem.modelData.isSecure) return "Tap to connect"
                                             return netItem.modelData.strength + "%"
                                         }
                                         font.family: "JetBrainsMono Nerd Font"
@@ -331,7 +343,6 @@ PanelWindow {
                                         ? Qt.rgba(root.cPrimary.r, root.cPrimary.g, root.cPrimary.b, 0.15)
                                         : "transparent"
                                     Behavior on color { ColorAnimation { duration: 100 } }
-                                    opacity: netItem.canConnect ? 1.0 : 0.3
 
                                     Text {
                                         anchors.centerIn: parent
@@ -345,11 +356,16 @@ PanelWindow {
                                         id: actionArea
                                         anchors.fill: parent
                                         hoverEnabled: true
-                                        cursorShape: netItem.canConnect ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                        cursorShape: Qt.PointingHandCursor
                                         onClicked: {
-                                            if (!netItem.canConnect) return
-                                            if (netItem.isActive) root.network.disconnectFromNetwork()
-                                            else root.network.connectToNetwork(netItem.ssid, "")
+                                            if (netItem.isActive) {
+                                                root.network.disconnectFromNetwork()
+                                            } else if (netItem.isSaved || !netItem.modelData.isSecure) {
+                                                root.network.connectToNetwork(netItem.ssid, "")
+                                            } else {
+                                                passwordDialog.networkSSID = netItem.ssid
+                                                passwordDialog.open()
+                                            }
                                         }
                                     }
                                 }
@@ -425,6 +441,175 @@ PanelWindow {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: settingsProcess.running = true
+                    }
+                }
+            }
+        }
+    }
+
+    // ---- Password dialog (phase 2) ----
+    // Sits above the panel. While open, hover auto-close is suppressed and a
+    // backdrop click dismisses only the dialog, never the whole panel.
+    Item {
+        id: passwordDialog
+        anchors.fill: parent
+        z: 100
+        property string networkSSID: ""
+        property bool isOpen: false
+
+        visible: opacity > 0
+        opacity: isOpen ? 1.0 : 0.0
+
+        function open() {
+            isOpen = true
+            root.passwordOpen = true
+            passwordInput.text = ""
+            passwordInput.forceActiveFocus()
+        }
+
+        function close() {
+            isOpen = false
+            root.passwordOpen = false
+            passwordInput.text = ""
+        }
+
+        Behavior on opacity { NumberAnimation { duration: 140 } }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 22
+            color: Qt.rgba(0, 0, 0, 0.55)
+
+            MouseArea { anchors.fill: parent; onClicked: passwordDialog.close() }
+        }
+
+        Rectangle {
+            id: dialogCard
+            anchors.centerIn: parent
+            width: parent.width - 64
+            height: dialogColumn.implicitHeight + 40
+            radius: 20
+            color: root.cSurfaceContainerHigh
+            scale: passwordDialog.isOpen ? 1.0 : 0.92
+            Behavior on scale { NumberAnimation { duration: 200; easing.bezierCurve: Material3Anim.springBounce } }
+
+            // Swallow clicks so the backdrop handler above never sees them.
+            MouseArea { anchors.fill: parent }
+
+            ColumnLayout {
+                id: dialogColumn
+                anchors.fill: parent
+                anchors.margins: 20
+                spacing: 12
+
+                Text {
+                    text: "Enter password"
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 13
+                    font.weight: Font.Bold
+                    color: root.cOnSurface
+                }
+
+                Text {
+                    Layout.fillWidth: true
+                    text: passwordDialog.networkSSID
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 11
+                    color: root.cOnSurfaceVariant
+                    elide: Text.ElideRight
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+                    radius: 12
+                    color: root.cSurfaceContainer
+                    border.width: 1
+                    border.color: passwordInput.activeFocus ? root.cPrimary : "transparent"
+
+                    TextField {
+                        id: passwordInput
+                        anchors.fill: parent
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
+                        placeholderText: "Password"
+                        placeholderTextColor: Qt.rgba(root.cOnSurfaceVariant.r, root.cOnSurfaceVariant.g, root.cOnSurfaceVariant.b, 0.6)
+                        echoMode: TextInput.Password
+                        color: root.cOnSurface
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: 13
+                        background: Item {}
+
+                        onAccepted: {
+                            if (text.length > 0) {
+                                root.network.connectToNetwork(passwordDialog.networkSSID, text)
+                                passwordDialog.close()
+                            }
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
+
+                    Item { Layout.fillWidth: true }
+
+                    Rectangle {
+                        Layout.preferredWidth: 76
+                        Layout.preferredHeight: 32
+                        radius: 16
+                        color: cancelBtn.pressed
+                            ? Qt.rgba(root.cOnSurface.r, root.cOnSurface.g, root.cOnSurface.b, 0.12)
+                            : cancelBtn.containsMouse
+                                ? Qt.rgba(root.cOnSurface.r, root.cOnSurface.g, root.cOnSurface.b, 0.08)
+                                : "transparent"
+                        Behavior on color { ColorAnimation { duration: 120 } }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Cancel"
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 12
+                            color: root.cOnSurface
+                        }
+
+                        MouseArea {
+                            id: cancelBtn
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: passwordDialog.close()
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.preferredWidth: 88
+                        Layout.preferredHeight: 32
+                        radius: 16
+                        color: passwordInput.text.length > 0
+                            ? root.cPrimary
+                            : Qt.rgba(root.cPrimary.r, root.cPrimary.g, root.cPrimary.b, 0.35)
+                        Behavior on color { ColorAnimation { duration: 120 } }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Connect"
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 12
+                            font.weight: Font.Medium
+                            color: passwordInput.text.length > 0 ? "#0e0e0e" : Qt.rgba(0.05, 0.05, 0.05, 0.5)
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: passwordInput.text.length > 0
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                root.network.connectToNetwork(passwordDialog.networkSSID, passwordInput.text)
+                                passwordDialog.close()
+                            }
+                        }
                     }
                 }
             }

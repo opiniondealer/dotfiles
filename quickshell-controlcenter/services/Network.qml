@@ -85,10 +85,6 @@ Singleton {
     Process {
         running: true
         command: ["nmcli", "m"]
-                environment: ({
-                    LANG: "C.UTF-8",
-                    LC_ALL: "C.UTF-8"
-                })
 
         stdout: SplitParser {
             onRead: getNetworks.running = true
@@ -100,10 +96,6 @@ Singleton {
 
         running: true
         command: ["nmcli", "radio", "wifi"]
-                environment: ({
-                    LANG: "C.UTF-8",
-                    LC_ALL: "C.UTF-8"
-                })
 
         stdout: StdioCollector {
             onStreamFinished: {
@@ -115,11 +107,6 @@ Singleton {
     Process {
         id: enableWifiProc
 
-        environment: ({
-            LANG: "C.UTF-8",
-            LC_ALL: "C.UTF-8"
-        })
-
         onExited: {
             root.getWifiStatus();
             getNetworks.running = true;
@@ -130,10 +117,6 @@ Singleton {
         id: rescanProc
 
         command: ["nmcli", "dev", "wifi", "list", "--rescan", "yes"]
-                environment: ({
-                    LANG: "C.UTF-8",
-                    LC_ALL: "C.UTF-8"
-                })
 
         onExited: {
             getNetworks.running = true;
@@ -142,11 +125,6 @@ Singleton {
 
     Process {
         id: connectProc
-
-        environment: ({
-            LANG: "C.UTF-8",
-            LC_ALL: "C.UTF-8"
-        })
         stdout: SplitParser {
             onRead: data => {
                 QsServices.Logger.debug("Network", `Connection output: ${data}`)
@@ -168,11 +146,6 @@ Singleton {
 
     Process {
         id: disconnectProc
-
-        environment: ({
-            LANG: "C.UTF-8",
-            LC_ALL: "C.UTF-8"
-        })
         stdout: SplitParser {
             onRead: getNetworks.running = true
         }
@@ -182,10 +155,6 @@ Singleton {
         id: checkSavedProc
         
         command: ["nmcli", "-g", "NAME", "connection", "show"]
-                environment: ({
-                    LANG: "C.UTF-8",
-                    LC_ALL: "C.UTF-8"
-                })
 
         stdout: StdioCollector {
             onStreamFinished: {
@@ -228,10 +197,6 @@ Singleton {
 
         running: true
         command: ["nmcli", "-g", "ACTIVE,SIGNAL,FREQ,SSID,BSSID,SECURITY", "d", "w"]
-                environment: ({
-                    LANG: "C.UTF-8",
-                    LC_ALL: "C.UTF-8"
-                })
 
         stdout: StdioCollector {
             onStreamFinished: {
