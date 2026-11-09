@@ -97,7 +97,7 @@
     "network": {
         "interface": "wlo1",
         "tooltip": true,
-        "on-click": "bash -lc /home/abay/.config/hyprdots/scripts/wifi-panel.py",
+        "on-click": "/usr/bin/quickshell ipc -p $HOME/.config/quickshell-controlcenter call network toggle",
         "on-click-right": "nm-connection-editor",
         "format-wifi": "󰖩",
         "format-ethernet": "󰈀",
@@ -111,7 +111,6 @@
     "bluetooth": {
         "format": "",
         "on-click": "/usr/bin/quickshell ipc -p $HOME/.config/quickshell-controlcenter call bluetooth toggle",
-        "on-click-right": "bash -lc '$HOME/.config/hyprdots/scripts/bluetooth-panel.py'",
         "format-connected": "",
         "format-disabled": "",
         "format-off": "",

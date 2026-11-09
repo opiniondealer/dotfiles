@@ -81,5 +81,17 @@ ShellRoot {
         }
     }
 
+    NetworkPanel {
+        id: net
+
+        IpcHandler {
+            target: "network"
+
+            function toggle(): void { net.toggle() }
+            function open(): void { net.shouldShow = true; QsServices.Network.rescanWifi() }
+            function close(): void { net.shouldShow = false }
+        }
+    }
+
     Component.onCompleted: QsServices.Logger.info("Shell", "Control Center shell loaded")
 }
