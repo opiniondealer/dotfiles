@@ -3,8 +3,11 @@
 Hyprland desktop on Debian with the "Serialchiller" theme (neutral dark, blue
 accent) shared across Waybar, Kitty, btop, bat, fastfetch and GTK.
 
-| ![Main](screenshots/1.jpg) | ![Panels](screenshots/2.jpg) | ![Terminal](screenshots/3.jpg) |
-|---|---|---|
+![Main](screenshots/1.jpg)
+
+![Panels](screenshots/2.jpg)
+
+![Terminal](screenshots/3.jpg)
 
 ## Install
 
