@@ -59,7 +59,16 @@ path() { echo -e ${PATH//:/\\n}; }
 cekip() { curl -s ipinfo.io/ip; echo; }
 
 # PATH
-export PATH="$HOME/development/dotfiles/bin:$HOME/.local/bin:$PATH"
+# Dotfiles repo lives wherever it was cloned. Resolve this file's real
+# directory (following symlinks) so bin/ is found from any clone location.
+if [ -n "${ZSH_VERSION:-}" ]; then
+    DOTFILES_DIR="${${(%):-%x}:A:h}"
+else
+    DOTFILES_DIR="${BASH_SOURCE[0]:-${(%):-%x}}"
+    DOTFILES_DIR="$(cd "$(dirname "$DOTFILES_DIR")" && pwd)"
+fi
+export DOTFILES_DIR
+export PATH="$DOTFILES_DIR/bin:$HOME/.local/bin:$PATH"
 export PATH="/usr/local/go/bin:$HOME/go/bin:$HOME/.pdtm/go/bin:$PATH"
 export PATH="$HOME/.gems/bin:$PATH"
 export PATH="$HOME/.opencode/bin:$PATH"

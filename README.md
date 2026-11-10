@@ -20,7 +20,9 @@ Waybar, Kitty, btop, fastfetch and GTK.
 
 ### CLI / TUI
 
-- **.zshrc** - Shell config (Oh My Zsh, custom prompt, aliases, functions, PATH)
+- **.zshrc** - Shell config (Oh My Zsh, custom prompt, aliases, functions, PATH).
+  Resolves its own real location, so `bin/` is on PATH no matter where the
+  repo was cloned and even though the file is symlinked into `$HOME`.
 - **kitty/** - Kitty terminal config + `serialchiller.conf` theme
 - **nvim/** - Neovim config (LazyVim + lazy.nvim)
 - **git/.gitconfig** - Git config
@@ -131,10 +133,30 @@ the command to run after logging in:
 systemctl --user enable --now quickshell-controlcenter.service
 ```
 
-### Missing commands
+### Dependency report
 
-At the end the script lists any binaries it did not find, so you know what to
-install before the setup is fully functional.
+The script ends with a full check of everything the configs call, not just the
+handful it links. Each dependency is printed with its status, and anything
+missing comes with the apt package that provides it:
+
+```
+[dependencies]
+  ok      hyprland
+  ok      waybar
+  MISSING playerctl  (media controls)  -> apt install playerctl
+  ...
+
+[assets]
+  ok      Nerd Font (JetBrainsMono)
+  MISSING Material Design Icons font  -> apt install fonts-materialdesignicons-webfont
+```
+
+The `[assets]` section covers things that are not binaries: the two icon fonts
+and the screenshot directory (which the script creates). A missing font does not
+stop the bar from starting, but every glyph renders as a box, so it is worth
+fixing.
+
+Nothing is installed automatically — this is a report, not an installer.
 
 ### Verification
 
@@ -159,7 +181,6 @@ below for the one hardware-dependent crash it cannot catch.
 - **nmcli** (NetworkManager) - WiFi in both Waybar and the Quickshell panel
 - **blueman** - `blueman-manager`, opened from the Bluetooth panel footer
 - **brightnessctl**, **pactl** (PipeWire/PulseAudio) - sliders and media keys
-- **Nemo** - file manager
 - **JetBrainsMono Nerd Font** - UI font
 - **Material Design Icons** font - panel glyphs
 - [btop](https://github.com/aristocratos/btop) - optional, for the serialchiller theme

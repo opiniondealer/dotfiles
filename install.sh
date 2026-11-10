@@ -55,13 +55,63 @@ sys.stdout.write(s)
 PY
 }
 
-need() {
-    if ! command -v "$1" >/dev/null 2>&1; then
-        MISSING+=("$1")
-    fi
-}
+# --- dependencies ------------------------------------------------------
+# Each entry is "binary|package|what it is for". Checked at the end, after the
+# configs are in place, so the report is the last thing the user reads.
+DEPS=(
+    # core desktop
+    "hyprland|hyprland|window manager (not in Debian trixie, build it)"
+    "hyprpaper|hyprpaper|wallpaper"
+    "hyprlock|hyprlock|lock screen"
+    "hypridle|hypridle|idle daemon"
+    "waybar|waybar|the bar"
+    "wofi|wofi|launcher"
+    "quickshell|quickshell|control center (not in Debian trixie, build it)"
+    "kitty|kitty|terminal"
+    "swaync|swaync|notification daemon (legacy)"
+    # shell / editor
+    "zsh|zsh|shell"
+    "git|git|git config"
+    "nvim|-|editor, system package or ~/apps/nvim build"
+    "python3|python3|panel scripts"
+    "jq|jq|panel + layout scripts"
+    "curl|curl|recon scripts"
+    "btop|btop|system monitor (theme)"
+    "fastfetch|fastfetch|system info on shell start"
+    # hardware control
+    "pactl|pulseaudio-utils|volume (PulseAudio/PipeWire)"
+    "wpctl|wireplumber|audio switching"
+    "brightnessctl|brightnessctl|brightness"
+    "nmcli|network-manager|wifi in bar and panel"
+    "rfkill|rfkill|bluetooth power state"
+    "bluetoothctl|bluez|bluetooth devices"
+    "blueman-manager|blueman|bluetooth settings window"
+    "playerctl|playerctl|media controls"
+    # screenshot
+    "grim|grim|screenshots"
+    "slurp|slurp|region select"
+    "wl-copy|wl-clipboard|clipboard"
+    # image tooling (wallpaper fallback)
+    "magick|imagemagick|wallpaper fallback image"
+)
 
 MISSING=()
+
+# Pure predicate: is this requirement satisfied? Never mutates state, so it is
+# safe to call from both the report and the summary count.
+need() {
+    local bin="$1"
+    command -v "$bin" >/dev/null 2>&1 && return 0
+    # a local neovim build satisfies the nvim requirement
+    [ "$bin" = "nvim" ] && [ -x "$HOME/apps/nvim/bin/nvim" ] && return 0
+    return 1
+}
+
+# ImageMagick ships as `magick` (v7) or `convert` (v6); accept either.
+have_magick() {
+    command -v magick >/dev/null 2>&1 || command -v convert >/dev/null 2>&1
+}
+
 
 # --- wallpaper fallback -------------------------------------------------
 
@@ -88,14 +138,12 @@ echo ""
 
 echo "[shell]"
 link "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
-need zsh
 
 # --- terminal ----------------------------------------------------------
 
 echo "[kitty]"
 link "$DOTFILES_DIR/kitty/kitty.conf" "$HOME/.config/kitty/kitty.conf"
 link "$DOTFILES_DIR/kitty/serialchiller.conf" "$HOME/.config/kitty/themes/serialchiller.conf"
-need kitty
 
 # --- neovim ------------------------------------------------------------
 
@@ -111,17 +159,12 @@ for f in all-themes disable-news-alert snacks-animated-scrolling-off; do
     link "$DOTFILES_DIR/nvim/lua/plugins/$f.lua" "$HOME/.config/nvim/lua/plugins/$f.lua"
 done
 link "$DOTFILES_DIR/nvim/plugin/after/transparency.lua" "$HOME/.config/nvim/plugin/after/transparency.lua"
-# nvim can come from the system or from ~/apps/nvim (the alias in .zshrc
-# prefers the local build when it exists).
-if ! command -v nvim >/dev/null 2>&1 && [ ! -x "$HOME/apps/nvim/bin/nvim" ]; then
-    MISSING+=("nvim (or a build in ~/apps/nvim/bin)")
-fi
+
 
 # --- git ---------------------------------------------------------------
 
 echo "[git]"
 link "$DOTFILES_DIR/git/.gitconfig" "$HOME/.gitconfig"
-need git
 
 # --- bin ---------------------------------------------------------------
 
@@ -151,7 +194,6 @@ if [ -f "$HOME/.config/btop/btop.conf" ]; then
         echo "  color_theme not found in btop.conf, set it manually"
     fi
 fi
-need btop
 
 echo "[fastfetch]"
 if command -v fastfetch >/dev/null 2>&1; then
@@ -179,8 +221,6 @@ fi
 link "$DOTFILES_DIR/hypr/monitors-single.conf" "$HOME/.config/hypr/monitors.conf"
 link "$DOTFILES_DIR/hypr/monitors-single.conf" "$HOME/.config/hypr/monitors-single.conf"
 link "$DOTFILES_DIR/hypr/monitors-triple.conf" "$HOME/.config/hypr/monitors-triple.conf"
-need hyprland
-need hyprpaper
 
 echo "[hyprdots]"
 mkdir -p "$HOME/.config/hyprdots/scripts"
@@ -208,7 +248,6 @@ if [ -L "$HOME/.config/waybar/config" ] || [ -e "$HOME/.config/waybar/config" ];
     backup "$HOME/.config/waybar/config"
 fi
 link "$HOME/.config/waybar/config-single" "$HOME/.config/waybar/config"
-need waybar
 
 # --- launchers ---------------------------------------------------------
 
@@ -216,12 +255,10 @@ echo "[wofi]"
 render_link "$DOTFILES_DIR/wofi/config" "$HOME/.config/wofi/config"
 render_link "$DOTFILES_DIR/wofi/drun.conf" "$HOME/.config/wofi/drun.conf"
 link "$DOTFILES_DIR/wofi/style.css" "$HOME/.config/wofi/style.css"
-need wofi
 
 echo "[swaync]"
 link "$DOTFILES_DIR/swaync/config.json" "$HOME/.config/swaync/config.json"
 link "$DOTFILES_DIR/swaync/style.css" "$HOME/.config/swaync/style.css"
-need swaync
 
 # --- quickshell control center -----------------------------------------
 
@@ -229,7 +266,6 @@ echo "[quickshell-controlcenter]"
 link "$DOTFILES_DIR/quickshell-controlcenter" "$HOME/.config/quickshell-controlcenter"
 link "$DOTFILES_DIR/systemd/user/quickshell-controlcenter.service" \
      "$HOME/.config/systemd/user/quickshell-controlcenter.service"
-need quickshell
 # Only touch the live systemd user session when $HOME really is the user that
 # session belongs to. Overriding HOME (e.g. a dry run into a fake home) must not
 # enable a unit on the real session.
@@ -351,12 +387,66 @@ if command -v systemd-analyze >/dev/null 2>&1; then
     fi
 fi
 
+# --- dependency report -------------------------------------------------
+
+echo "[dependencies]"
+for entry in "${DEPS[@]}"; do
+    IFS='|' read -r bin pkg desc <<<"$entry"
+    if [ "$bin" = "magick" ]; then
+        if have_magick; then
+            echo "  ok      $bin"
+        else
+            MISSING+=("$bin|$pkg|$desc")
+            echo "  MISSING $bin  ($desc)  -> apt install $pkg"
+        fi
+        continue
+    fi
+    if need "$bin"; then
+        echo "  ok      $bin"
+    else
+        MISSING+=("$bin|$pkg|$desc")
+        if [ "$pkg" = "-" ]; then
+            echo "  MISSING $bin  ($desc)"
+        else
+            echo "  MISSING $bin  ($desc)  -> apt install $pkg"
+        fi
+    fi
+done
+
+# A missing library is a different kind of gap: the image is linked but the
+# theme/font will not render. Report it separately from binaries.
+echo ""
+echo "[assets]"
+check_asset() {
+    local label="$1" probe="$2" hint="$3"
+    if eval "$probe" >/dev/null 2>&1; then
+        echo "  ok      $label"
+    else
+        echo "  MISSING $label  -> $hint"
+    fi
+}
+# Note: probes must not use `cmd | grep -q`. With pipefail, grep exits early and
+# the producer dies of SIGPIPE, so the pipeline reports failure on a match.
+check_asset "Nerd Font (JetBrainsMono)" \
+    '[ -n "$(fc-list 2>/dev/null | grep -iE "JetBrains ?Mono.*Nerd" | head -1)" ]' \
+    "apt install ttf-jetbrains-mono-nerd"
+check_asset "Material Design Icons font" \
+    '[ -n "$(fc-list 2>/dev/null | grep -iE "Material ?Design ?Icons|materialdesignicons" | head -1)" ]' \
+    "apt install fonts-materialdesignicons-webfont"
+check_asset "fc-list available" \
+    "command -v fc-list" \
+    "apt install fontconfig"
+# Hyprland's screenshot binds write here; create it rather than complain.
+mkdir -p "$HOME/Pictures/screenshots"
+check_asset "screenshots directory" \
+    "[ -d \"$HOME/Pictures/screenshots\" ]" \
+    "could not create ~/Pictures/screenshots"
+
 # --- summary -----------------------------------------------------------
 
 echo ""
 if [ ${#MISSING[@]} -gt 0 ]; then
-    echo "Missing commands (install these for the config to work fully):"
-    printf '  - %s\n' "${MISSING[@]}" | sort -u
+    echo "Missing binaries: ${#MISSING[@]}. Install them, then re-run this script."
     echo ""
 fi
 
