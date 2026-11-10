@@ -189,10 +189,19 @@ link "$DOTFILES_DIR/hypr/themes/gtk-serialchiller.css" "$HOME/.themes/Serialchil
 
 echo "[btop]"
 link "$DOTFILES_DIR/btop/themes/serialchiller.theme" "$HOME/.config/btop/themes/serialchiller.theme"
+# btop.conf is edited in place (it holds the user's other settings), so keep a
+# copy in the backup dir before touching it. Skip the edit when it is already
+# correct, so re-running the script does not churn the file.
 if [ -f "$HOME/.config/btop/btop.conf" ]; then
     if grep -q '^color_theme' "$HOME/.config/btop/btop.conf"; then
-        sed -i 's/^color_theme = .*/color_theme = "serialchiller"/' "$HOME/.config/btop/btop.conf"
-        echo "  set color_theme = serialchiller in btop.conf"
+        if grep -q '^color_theme = "serialchiller"' "$HOME/.config/btop/btop.conf"; then
+            echo "  color_theme already serialchiller"
+        else
+            mkdir -p "$BACKUP_DIR/.config/btop"
+            cp "$HOME/.config/btop/btop.conf" "$BACKUP_DIR/.config/btop/btop.conf"
+            sed -i 's/^color_theme = .*/color_theme = "serialchiller"/' "$HOME/.config/btop/btop.conf"
+            echo "  set color_theme = serialchiller in btop.conf (previous copy backed up)"
+        fi
     else
         echo "  color_theme not found in btop.conf, set it manually"
     fi
