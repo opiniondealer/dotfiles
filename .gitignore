@@ -5,6 +5,12 @@
 *.old
 *.orig
 
+# Runtime profile symlinks, rewritten by switch-layout.sh on monitor hotplug.
+# Not tracked: they always differ from whatever was committed and would keep
+# the working tree permanently dirty. install.sh creates them.
+/hypr/monitors.conf
+/waybar/config
+
 # Editor / OS noise
 .DS_Store
 *.swp

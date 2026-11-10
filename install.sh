@@ -77,6 +77,7 @@ DEPS=(
     "jq|jq|panel + layout scripts"
     "curl|curl|recon scripts"
     "btop|btop|system monitor (theme)"
+    "bat|bat|cat replacement (theme + config)"
     "fastfetch|fastfetch|system info on shell start"
     # hardware control
     "pactl|pulseaudio-utils|volume (PulseAudio/PipeWire)"
@@ -104,6 +105,8 @@ need() {
     command -v "$bin" >/dev/null 2>&1 && return 0
     # a local neovim build satisfies the nvim requirement
     [ "$bin" = "nvim" ] && [ -x "$HOME/apps/nvim/bin/nvim" ] && return 0
+    # Debian ships bat as `batcat` to avoid clashing with bacula-console
+    [ "$bin" = "bat" ] && command -v batcat >/dev/null 2>&1 && return 0
     return 1
 }
 
@@ -195,6 +198,17 @@ if [ -f "$HOME/.config/btop/btop.conf" ]; then
     fi
 fi
 
+echo "[bat]"
+link "$DOTFILES_DIR/bat/config" "$HOME/.config/bat/config"
+link "$DOTFILES_DIR/bat/Serialchiller.tmTheme" "$HOME/.config/bat/themes/Serialchiller.tmTheme"
+# bat only reads themes it has cached; rebuild when bat is present.
+if command -v bat >/dev/null 2>&1 || command -v batcat >/dev/null 2>&1; then
+    (command -v bat >/dev/null 2>&1 && bat cache --build) >/dev/null 2>&1 || \
+        (command -v batcat >/dev/null 2>&1 && batcat cache --build) >/dev/null 2>&1 || \
+        echo "  theme cached later (run: bat cache --build)"
+    echo "  theme registered"
+fi
+
 echo "[fastfetch]"
 if command -v fastfetch >/dev/null 2>&1; then
     render_link "$DOTFILES_DIR/fastfetch/config.jsonc" "$HOME/.config/fastfetch/config.jsonc"
@@ -213,8 +227,9 @@ link "$DOTFILES_DIR/hypr/scripts/maxsize.sh" "$HOME/.config/hypr/scripts/maxsize
 render_link "$DOTFILES_DIR/hypr/hyprlock.conf" "$HOME/.config/hypr/hyprlock.conf"
 render_link "$DOTFILES_DIR/hypr/hyprpaper.conf" "$HOME/.config/hypr/hyprpaper.conf"
 
-# Monitor profile: keep an existing runtime symlink (switch-layout.sh owns it),
-# otherwise start from the single-monitor profile.
+# Monitor profile. monitors.conf is a runtime symlink owned by
+# switch-layout.sh (git-ignored); create it on a fresh install so Hyprland
+# has something to read before the first hotplug event.
 if [ -L "$HOME/.config/hypr/monitors.conf" ] || [ -e "$HOME/.config/hypr/monitors.conf" ]; then
     backup "$HOME/.config/hypr/monitors.conf"
 fi
@@ -242,8 +257,8 @@ link "$DOTFILES_DIR/waybar/themes/theme.css" "$HOME/.config/waybar/themes/theme.
 render_link "$DOTFILES_DIR/waybar/config-single" "$HOME/.config/waybar/config-single"
 render_link "$DOTFILES_DIR/waybar/config-triple" "$HOME/.config/waybar/config-triple"
 
-# ~/.config/waybar/config is a runtime symlink owned by switch-layout.sh.
-# Point it at the single profile on a fresh install.
+# ~/.config/waybar/config is the matching runtime symlink for Waybar
+# (git-ignored, same owner). Point it at the single profile on a fresh install.
 if [ -L "$HOME/.config/waybar/config" ] || [ -e "$HOME/.config/waybar/config" ]; then
     backup "$HOME/.config/waybar/config"
 fi

@@ -27,6 +27,7 @@ Waybar, Kitty, btop, fastfetch and GTK.
 - **nvim/** - Neovim config (LazyVim + lazy.nvim)
 - **git/.gitconfig** - Git config
 - **bin/** - Custom scripts (openapi-checker.sh, googleapicheck, basic-recon.sh)
+- **bat/** - bat (batcat on Debian) config + "Serialchiller" theme
 - **btop/** - btop theme "serialchiller"
 - **fastfetch/** - fastfetch config + the image used as its logo
 - **systemd/user/** - systemd user units (Quickshell control center)
@@ -120,7 +121,12 @@ count changes:
 - `~/.config/waybar/config`
 
 `install.sh` points both at the single-monitor profile on a fresh install and
-leaves them alone on a re-run. They are tracked in git but only as symlinks.
+leaves them alone on a re-run. They are **git-ignored**: their target changes on
+every hotplug, so tracking them would keep the working tree permanently dirty.
+
+`switch-layout.sh` resolves the repo from its own real path, so the automatic
+switch keeps working when the repo is cloned somewhere other than
+`~/development/dotfiles`.
 
 ### Quickshell service
 

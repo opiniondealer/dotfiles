@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 # switch-layout.sh — auto switch config Hyprland & Waybar based on connected monitors
 
-HYPR_DIR="$HOME/development/dotfiles/hypr"
-WAYBAR_DIR="$HOME/development/dotfiles/waybar"
+# Resolve the repo from this script's real location, so the layout still
+# switches when the repo is cloned somewhere other than the owner's machine.
+# The script is symlinked into ~/.config/hyprdots/scripts, so follow the link.
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+DOTFILES_DIR="$(cd "$(dirname "$SCRIPT_PATH")/../.." && pwd)"
+HYPR_DIR="$DOTFILES_DIR/hypr"
+WAYBAR_DIR="$DOTFILES_DIR/waybar"
 STATE_FILE="/tmp/hypr-layout-mode"
 
 HYPRSIG="${HYPRLAND_INSTANCE_SIGNATURE:-$(ls -t /run/user/$(id -u)/hypr/ 2>/dev/null | head -1)}"
