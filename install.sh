@@ -12,6 +12,8 @@ RENDER_DIR="$HOME/.config/dotfiles-rendered"
 
 mkdir -p "$BACKUP_DIR"
 
+CREATED_LINKS=()
+
 # --- helpers -----------------------------------------------------------
 
 backup() {
@@ -28,6 +30,7 @@ link() {
     mkdir -p "$(dirname "$dst")"
     backup "$dst"
     ln -sfn "$src" "$dst"
+    CREATED_LINKS+=("$dst")
     echo "  linked: $dst"
 }
 
@@ -246,6 +249,108 @@ else
     echo "  unit linked; after logging in run: systemctl --user enable --now quickshell-controlcenter.service"
 fi
 
+# --- verify ------------------------------------------------------------
+
+# Checks the result, not just that the commands above ran. Everything here is
+# static (file contents, JSON syntax, path targets) so it stays fast and does
+# not need a desktop session.
+echo "[verify]"
+VERIFY_FAIL=0
+vfail() { echo "  FAIL: $1"; VERIFY_FAIL=$((VERIFY_FAIL+1)); }
+vok()   { echo "  ok:   $1"; }
+
+# 1. no placeholder may survive in the rendered config
+if grep -rq "__HOME__\|__WALLPAPER__" "$RENDER_DIR" 2>/dev/null; then
+    vfail "unrendered placeholders left in $RENDER_DIR"
+else
+    vok "placeholders rendered"
+fi
+
+# 2. every symlink we created must resolve
+broken=0
+for l in "${CREATED_LINKS[@]}"; do
+    [ -e "$l" ] || { vfail "broken symlink: $l"; broken=1; }
+done
+[ "$broken" = 0 ] && vok "all symlinks resolve"
+
+# 3. JSON/JSONC configs must parse
+parse_json() { # file, label
+    python3 - "$1" <<'PY'
+import json, re, sys
+p = sys.argv[1]
+s = re.sub(r"^\s*//.*$", "", open(p).read(), flags=re.M)
+json.loads(s)
+PY
+}
+for f in "$HOME/.config/waybar/config" "$HOME/.config/waybar/config-single" \
+         "$HOME/.config/waybar/config-triple" "$HOME/.config/swaync/config.json"; do
+    [ -e "$f" ] || continue
+    if parse_json "$f" 2>/dev/null; then
+        vok "valid JSON: ${f#"$HOME"/}"
+    else
+        vfail "invalid JSON: ${f#"$HOME"/}"
+    fi
+done
+
+# 4. waybar module commands must point at files that exist
+if [ -e "$HOME/.config/waybar/config" ]; then
+    missing=$(python3 - "$HOME" <<'PY'
+import json, os, re, sys
+home = sys.argv[1]
+cfg = os.path.join(home, ".config/waybar/config")
+s = re.sub(r"^\s*//.*$", "", open(cfg).read(), flags=re.M)
+try:
+    d = json.loads(s)
+except Exception:
+    sys.exit(0)
+missing = []
+for name, mod in d.items():
+    if not isinstance(mod, dict):
+        continue
+    for key in ("exec", "on-click", "on-click-right"):
+        cmd = mod.get(key)
+        if not cmd:
+            continue
+        for path in re.findall(r"(/home/[^\s'\"]+)", cmd):
+            if not os.path.exists(path):
+                missing.append(f"{name}.{key} -> {path}")
+print("\n".join(missing))
+PY
+)
+    if [ -n "$missing" ]; then
+        while IFS= read -r m; do vfail "waybar target missing: $m"; done <<<"$missing"
+    else
+        vok "waybar module targets exist"
+    fi
+fi
+
+# 5. fastfetch must render its config
+if command -v fastfetch >/dev/null 2>&1; then
+    if fastfetch --config "$HOME/.config/fastfetch/config.jsonc" >/dev/null 2>&1; then
+        vok "fastfetch renders its config"
+    else
+        vfail "fastfetch failed on its config"
+    fi
+fi
+
+# 6. the quickshell unit must be syntactically valid
+if command -v systemd-analyze >/dev/null 2>&1; then
+    unit="$HOME/.config/systemd/user/quickshell-controlcenter.service"
+    out=$(systemd-analyze verify "$unit" 2>&1 || true)
+    # Keep only lines that talk about our unit. The verifier also reports on
+    # unrelated units already present on the machine, and complains about a
+    # missing /usr/bin/quickshell, which is covered by the dependency list.
+    real=$(echo "$out" \
+        | grep -i "quickshell-controlcenter" \
+        | grep -vi "is not executable" \
+        | grep -vi "Command /usr/bin/quickshell" || true)
+    if [ -n "$real" ]; then
+        vfail "systemd unit: $real"
+    else
+        vok "quickshell unit parses"
+    fi
+fi
+
 # --- summary -----------------------------------------------------------
 
 echo ""
@@ -253,6 +358,12 @@ if [ ${#MISSING[@]} -gt 0 ]; then
     echo "Missing commands (install these for the config to work fully):"
     printf '  - %s\n' "${MISSING[@]}" | sort -u
     echo ""
+fi
+
+if [ "$VERIFY_FAIL" -gt 0 ]; then
+    echo "Verification reported $VERIFY_FAIL problem(s) above."
+    echo "Configs are linked, but fix those before relying on the setup."
+    exit 1
 fi
 
 echo "Done. Log out and back in (or restart Hyprland) to apply everything."

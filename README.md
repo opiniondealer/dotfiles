@@ -136,6 +136,17 @@ systemctl --user enable --now quickshell-controlcenter.service
 At the end the script lists any binaries it did not find, so you know what to
 install before the setup is fully functional.
 
+### Verification
+
+The last step re-checks the result instead of trusting that the commands ran.
+It confirms that no placeholders survived, that every symlink the script made
+resolves, that the JSON configs parse, that Waybar's module commands point at
+files that exist, that fastfetch renders its config, and that the systemd unit
+is valid. Any failure is printed and the script exits non-zero.
+
+This is a static check — it does not start Waybar or Hyprland. See "Known issue"
+below for the one hardware-dependent crash it cannot catch.
+
 ## Prerequisites
 
 - Hyprland on Wayland
