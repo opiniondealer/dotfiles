@@ -60,13 +60,13 @@ PY
 # configs are in place, so the report is the last thing the user reads.
 DEPS=(
     # core desktop
-    "hyprland|hyprland|window manager (not in Debian trixie, build it)"
+    "hyprland|hyprland|window manager (trixie-backports)"
     "hyprpaper|hyprpaper|wallpaper"
     "hyprlock|hyprlock|lock screen"
     "hypridle|hypridle|idle daemon"
     "waybar|waybar|the bar"
     "wofi|wofi|launcher"
-    "quickshell|quickshell|control center (not in Debian trixie, build it)"
+    "quickshell|quickshell|control center (trixie-backports)"
     "kitty|kitty|terminal"
     "swaync|swaync|notification daemon (legacy)"
     # shell / editor
@@ -453,7 +453,7 @@ check_asset() {
 # the producer dies of SIGPIPE, so the pipeline reports failure on a match.
 check_asset "Nerd Font (JetBrainsMono)" \
     '[ -n "$(fc-list 2>/dev/null | grep -iE "JetBrains ?Mono.*Nerd" | head -1)" ]' \
-    "apt install ttf-jetbrains-mono-nerd"
+    "not in apt; download JetBrainsMono.zip from nerd-fonts releases"
 check_asset "Material Design Icons font" \
     '[ -n "$(fc-list 2>/dev/null | grep -iE "Material ?Design ?Icons|materialdesignicons" | head -1)" ]' \
     "apt install fonts-materialdesignicons-webfont"
