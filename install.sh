@@ -252,7 +252,7 @@ for s in audio-switch globalcontrol hypr-monitor-listener shortcuts systemupdate
     [ -e "$DOTFILES_DIR/hyprdots/scripts/$s.sh" ] && \
         link "$DOTFILES_DIR/hyprdots/scripts/$s.sh" "$HOME/.config/hyprdots/scripts/$s.sh"
 done
-for p in audio-panel brightness-panel calendar-panel shortcuts-panel todoist-tasks panel_scale; do
+for p in audio-panel brightness-panel shortcuts-panel todoist-tasks panel_scale; do
     [ -e "$DOTFILES_DIR/hyprdots/scripts/$p.py" ] && \
         link "$DOTFILES_DIR/hyprdots/scripts/$p.py" "$HOME/.config/hyprdots/scripts/$p.py"
 done

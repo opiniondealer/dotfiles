@@ -53,9 +53,11 @@ Runs as a systemd user service.
 | Control center | `SUPER+C`, Waybar gear | Clock, toggles (WiFi, Bluetooth, DND, Gaming Mode), volume/brightness, CPU/RAM/DISK, notifications |
 | Bluetooth | Waybar icon | Adapter power (unblocks rfkill first), scan, connect/disconnect |
 | WiFi | Waybar icon | Radio toggle, scan, connect to saved/open networks, password dialog |
+| Calendar | Waybar clock | Month grid, arrow/wheel/Left-Right to step months, Home or "Today" to jump back |
 
 ```bash
 quickshell ipc -p ~/.config/quickshell-controlcenter call controlcenter toggle
+quickshell ipc -p ~/.config/quickshell-controlcenter call calendar toggle
 systemctl --user restart quickshell-controlcenter
 ```
 

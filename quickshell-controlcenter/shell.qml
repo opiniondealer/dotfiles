@@ -93,5 +93,17 @@ ShellRoot {
         }
     }
 
+    CalendarPanel {
+        id: cal
+
+        IpcHandler {
+            target: "calendar"
+
+            function toggle(): void { cal.toggle() }
+            function open(): void { cal.shouldShow = true; cal.goToday() }
+            function close(): void { cal.shouldShow = false }
+        }
+    }
+
     Component.onCompleted: QsServices.Logger.info("Shell", "Control Center shell loaded")
 }

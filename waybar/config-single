@@ -49,8 +49,8 @@
     "clock": {
         "format": "{:%H.%M | %b %d, %Y}",
         "tooltip": false,
-        "on-click": "bash -lc __HOME__/.config/hyprdots/scripts/calendar-panel.py",
-        "on-click-right": "bash -lc __HOME__/.config/hyprdots/scripts/calendar-panel.py"
+        "on-click": "/usr/bin/quickshell ipc -p __HOME__/.config/quickshell-controlcenter call calendar toggle",
+        "on-click-right": "/usr/bin/quickshell ipc -p __HOME__/.config/quickshell-controlcenter call calendar toggle"
     },
 
     // ---- Updates (Debian) ----
