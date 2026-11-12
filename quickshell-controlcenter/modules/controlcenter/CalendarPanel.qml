@@ -25,8 +25,29 @@ PanelWindow {
     property bool shouldShow: false
 
     // --- calendar state -----------------------------------------------------
-    property int viewYear: new Date().getFullYear()
-    property int viewMonth: new Date().getMonth() // 0-based
+    // Today is kept in real properties, not recomputed inside bindings: QML only
+    // re-evaluates a binding when a property it reads changes, and `new Date()`
+    // is not a tracked dependency. Without this the highlight froze on the day
+    // the panel was first created.
+    property int todayYear: new Date().getFullYear()
+    property int todayMonth: new Date().getMonth() // 0-based
+    property int todayDay: new Date().getDate()
+
+    property int viewYear: todayYear
+    property int viewMonth: todayMonth
+
+    // Keep "today" current: roll over at midnight and catch timezone changes.
+    Timer {
+        interval: 30000
+        running: root.shouldShow
+        repeat: true
+        onTriggered: {
+            const now = new Date()
+            root.todayYear = now.getFullYear()
+            root.todayMonth = now.getMonth()
+            root.todayDay = now.getDate()
+        }
+    }
 
     readonly property var monthNames: [
         "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
@@ -63,10 +84,9 @@ PanelWindow {
     // True when this populated cell is the real current date.
     function cellIsToday(cell) {
         if (!cell || cell.other) return false
-        const now = new Date()
-        return viewYear === now.getFullYear()
-            && viewMonth === now.getMonth()
-            && cell.day === now.getDate()
+        return viewYear === todayYear
+            && viewMonth === todayMonth
+            && cell.day === todayDay
     }
 
     function shiftMonth(delta) {
@@ -79,14 +99,24 @@ PanelWindow {
     }
 
     function goToday() {
+        viewYear = todayYear
+        viewMonth = todayMonth
+    }
+
+    function refreshToday(): void {
         const now = new Date()
-        viewYear = now.getFullYear()
-        viewMonth = now.getMonth()
+        todayYear = now.getFullYear()
+        todayMonth = now.getMonth()
+        todayDay = now.getDate()
     }
 
     function toggle(): void {
         root.shouldShow = !root.shouldShow
-        if (root.shouldShow) root.goToday()
+        if (root.shouldShow) {
+            // the service may have been running for days; resync before showing
+            refreshToday()
+            goToday()
+        }
     }
 
     // --- window -------------------------------------------------------------
