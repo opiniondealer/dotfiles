@@ -248,7 +248,7 @@ link "$DOTFILES_DIR/hypr/monitors-triple.conf" "$HOME/.config/hypr/monitors-trip
 
 echo "[hyprdots]"
 mkdir -p "$HOME/.config/hyprdots/scripts"
-for s in audio-switch globalcontrol hypr-monitor-listener shortcuts systemupdate wallpaper ws volume-slider switch-layout; do
+for s in globalcontrol hypr-monitor-listener shortcuts systemupdate ws switch-layout; do
     [ -e "$DOTFILES_DIR/hyprdots/scripts/$s.sh" ] && \
         link "$DOTFILES_DIR/hyprdots/scripts/$s.sh" "$HOME/.config/hyprdots/scripts/$s.sh"
 done

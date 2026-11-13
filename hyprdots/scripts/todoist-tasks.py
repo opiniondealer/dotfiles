@@ -20,6 +20,7 @@ Env:
 import datetime
 import json
 import os
+import socket
 import sys
 import time
 import urllib.request
@@ -66,6 +67,35 @@ def emit(text, tooltip, cls):
     print(json.dumps({"text": text, "tooltip": tooltip, "class": cls}), flush=True)
 
 
+def _http_json(url, headers, timeout):
+    """GET url and decode JSON, resolving IPv4 first.
+
+    On a host with a broken IPv6 route, getaddrinfo lists AAAA records first and
+    the connect blocks there far past the timeout, so trying the default order
+    first hangs the whole module. IPv4 wins in well under a second; the second
+    attempt keeps IPv6-only networks working.
+    """
+    orig = socket.getaddrinfo
+
+    def v4_only(*args, **kwargs):
+        return [r for r in orig(*args, **kwargs) if r[0] == socket.AF_INET]
+
+    socket.getaddrinfo = v4_only
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.load(resp)
+    except Exception:
+        pass
+    finally:
+        socket.getaddrinfo = orig
+
+    # fall back to whatever the resolver returns (IPv6-only networks)
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.load(resp)
+
+
 def fetch_tasks():
     """Return tasks due today or overdue, highest priority first.
 
@@ -80,9 +110,7 @@ def fetch_tasks():
             key = os.environ.get("TODOIST_API_KEY", "")
             if not key:
                 return None, "TODOIST_API_KEY not found"
-            req = urllib.request.Request(API, headers={"Authorization": "Bearer " + key})
-            with urllib.request.urlopen(req, timeout=8) as resp:
-                payload = json.load(resp)
+            payload = _http_json(API, {"Authorization": "Bearer " + key}, 8)
     except Exception as exc:  # network / auth / bad json
         return None, str(exc)[:60]
 
