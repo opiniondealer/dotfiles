@@ -6,8 +6,11 @@
 # The script is symlinked into ~/.config/hyprdots/scripts, so follow the link.
 SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
 DOTFILES_DIR="$(cd "$(dirname "$SCRIPT_PATH")/../.." && pwd)"
-HYPR_DIR="$DOTFILES_DIR/hypr"
-WAYBAR_DIR="$DOTFILES_DIR/waybar"
+
+# Symlink into ~/.config, which is what Hyprland and Waybar actually read.
+# The repo copies stay untouched: they are the source of the two profiles.
+HYPR_DIR="$HOME/.config/hypr"
+WAYBAR_DIR="$HOME/.config/waybar"
 STATE_FILE="/tmp/hypr-layout-mode"
 
 HYPRSIG="${HYPRLAND_INSTANCE_SIGNATURE:-$(ls -t /run/user/$(id -u)/hypr/ 2>/dev/null | head -1)}"
@@ -30,11 +33,11 @@ fi
 echo "$target" > "$STATE_FILE"
 
 if [ "$target" = "triple" ]; then
-    ln -sf "monitors-triple.conf" "$HYPR_DIR/monitors.conf"
-    ln -sf "config-triple" "$WAYBAR_DIR/config"
+    ln -sfn "$DOTFILES_DIR/hypr/monitors-triple.conf" "$HYPR_DIR/monitors.conf"
+    ln -sfn "$DOTFILES_DIR/waybar/config-triple" "$WAYBAR_DIR/config"
 else
-    ln -sf "monitors-single.conf" "$HYPR_DIR/monitors.conf"
-    ln -sf "config-single" "$WAYBAR_DIR/config"
+    ln -sfn "$DOTFILES_DIR/hypr/monitors-single.conf" "$HYPR_DIR/monitors.conf"
+    ln -sfn "$DOTFILES_DIR/waybar/config-single" "$WAYBAR_DIR/config"
 fi
 
 # Reload Hyprland config

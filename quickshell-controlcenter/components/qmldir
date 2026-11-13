@@ -1,5 +1,3 @@
 module qs.components
-Anim 1.0 Anim.qml
 NotificationCard 1.0 NotificationCard.qml
-Elevation 1.0 Elevation.qml
 StyledFlickable 1.0 StyledFlickable.qml
