@@ -234,21 +234,32 @@ link "$DOTFILES_DIR/hypr/workspaces.conf" "$HOME/.config/hypr/workspaces.conf"
 link "$DOTFILES_DIR/hypr/hypridle.conf" "$HOME/.config/hypr/hypridle.conf"
 link "$DOTFILES_DIR/hypr/scripts/maxsize.sh" "$HOME/.config/hypr/scripts/maxsize.sh"
 render_link "$DOTFILES_DIR/hypr/hyprlock.conf" "$HOME/.config/hypr/hyprlock.conf"
-render_link "$DOTFILES_DIR/hypr/hyprpaper.conf" "$HOME/.config/hypr/hyprpaper.conf"
-
-# Monitor profile. monitors.conf is a runtime symlink owned by
-# switch-layout.sh (git-ignored); create it on a fresh install so Hyprland
-# has something to read before the first hotplug event.
-if [ -L "$HOME/.config/hypr/monitors.conf" ] || [ -e "$HOME/.config/hypr/monitors.conf" ]; then
-    backup "$HOME/.config/hypr/monitors.conf"
+# hyprpaper.conf is rendered with a wallpaper path, but wallpaper.sh rewrites
+# that path in place when the user picks a new image. Re-rendering on a re-run
+# would throw that choice away, so render only when the file is missing.
+if [ ! -e "$HOME/.config/hypr/hyprpaper.conf" ]; then
+    render_link "$DOTFILES_DIR/hypr/hyprpaper.conf" "$HOME/.config/hypr/hyprpaper.conf"
+else
+    wp=$(grep -oP '^\s*path\s*=\s*\K.*' "$HOME/.config/hypr/hyprpaper.conf" 2>/dev/null | head -1 | xargs)
+    echo "  kept existing hyprpaper.conf (wallpaper: ${wp:-unset})"
 fi
-link "$DOTFILES_DIR/hypr/monitors-single.conf" "$HOME/.config/hypr/monitors.conf"
+
+# Monitor profile. This is a runtime symlink owned by switch-layout.sh and
+# git-ignored. Only create it when nothing is there yet: on a re-run the
+# current target (single or triple) must survive, otherwise installing would
+# silently reset a triple-monitor session to the single profile.
+if [ ! -e "$HOME/.config/hypr/monitors.conf" ] && [ ! -L "$HOME/.config/hypr/monitors.conf" ]; then
+    link "$DOTFILES_DIR/hypr/monitors-single.conf" "$HOME/.config/hypr/monitors.conf"
+    echo "  created monitors.conf (single profile); switch-layout.sh owns it from now on"
+else
+    echo "  kept existing monitors.conf -> $(readlink "$HOME/.config/hypr/monitors.conf" 2>/dev/null || echo "regular file")"
+fi
 link "$DOTFILES_DIR/hypr/monitors-single.conf" "$HOME/.config/hypr/monitors-single.conf"
 link "$DOTFILES_DIR/hypr/monitors-triple.conf" "$HOME/.config/hypr/monitors-triple.conf"
 
 echo "[hyprdots]"
 mkdir -p "$HOME/.config/hyprdots/scripts"
-for s in globalcontrol hypr-monitor-listener shortcuts systemupdate ws switch-layout; do
+for s in globalcontrol hypr-monitor-listener shortcuts systemupdate wallpaper ws switch-layout; do
     [ -e "$DOTFILES_DIR/hyprdots/scripts/$s.sh" ] && \
         link "$DOTFILES_DIR/hyprdots/scripts/$s.sh" "$HOME/.config/hyprdots/scripts/$s.sh"
 done
@@ -268,10 +279,12 @@ render_link "$DOTFILES_DIR/waybar/config-triple" "$HOME/.config/waybar/config-tr
 
 # ~/.config/waybar/config is the matching runtime symlink for Waybar
 # (git-ignored, same owner). Point it at the single profile on a fresh install.
-if [ -L "$HOME/.config/waybar/config" ] || [ -e "$HOME/.config/waybar/config" ]; then
-    backup "$HOME/.config/waybar/config"
+if [ ! -e "$HOME/.config/waybar/config" ] && [ ! -L "$HOME/.config/waybar/config" ]; then
+    link "$HOME/.config/waybar/config-single" "$HOME/.config/waybar/config"
+    echo "  created waybar config (single profile); switch-layout.sh owns it from now on"
+else
+    echo "  kept existing waybar config -> $(readlink "$HOME/.config/waybar/config" 2>/dev/null || echo "regular file")"
 fi
-link "$HOME/.config/waybar/config-single" "$HOME/.config/waybar/config"
 
 # --- launchers ---------------------------------------------------------
 
