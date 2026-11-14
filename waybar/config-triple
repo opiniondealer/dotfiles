@@ -12,13 +12,12 @@
     "margin-right": 8,
 
     "modules-left": [
-        "custom/l_end", "clock", "custom/r_end"
+        "custom/l_end", "clock", "custom/todoist", "custom/r_end"
     ],
     "modules-center": [
         "custom/l_end", "hyprland/workspaces", "custom/r_end"
     ],
     "modules-right": [
-        "custom/l_end", "custom/todoist", "custom/r_end",
         "custom/l_end", "tray", "custom/r_end",
         "custom/l_end", "custom/shortcuts", "network", "bluetooth", "memory", "cpu", "battery", "custom/notification", "custom/controlcenter", "custom/r_end"
     ],
@@ -83,6 +82,7 @@
     "custom/todoist": {
         "exec": "$HOME/.config/hyprdots/scripts/todoist-tasks.py",
         "return-type": "json",
+        "format": "| {}",
         "tooltip": true,
         "on-click": "bash -lc 'APP=$HOME/apps/todoist.AppImage; if [ -x $APP ]; then $APP >/dev/null 2>&1 & elif command -v todoist >/dev/null 2>&1; then todoist >/dev/null 2>&1 & else notify-send Todoist No-Todoist-app-found; fi'"
     },
