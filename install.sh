@@ -186,6 +186,7 @@ link "$DOTFILES_DIR/bin/basic-recon.sh" "$HOME/.local/bin/basic-recon.sh"
 echo "[desktop]"
 mkdir -p "$HOME/.local/share/applications"
 render_link "$DOTFILES_DIR/desktop/youtube-music.desktop" "$HOME/.local/share/applications/youtube-music.desktop"
+render_link "$DOTFILES_DIR/desktop/youtube.desktop" "$HOME/.local/share/applications/youtube.desktop"
 render_link "$DOTFILES_DIR/desktop/whatsapp-web.desktop" "$HOME/.local/share/applications/whatsapp-web.desktop"
 
 # --- gtk ---------------------------------------------------------------

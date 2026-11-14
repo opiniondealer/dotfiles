@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=YouTube
+Comment=YouTube (standalone Brave app, shares the YouTube Music profile)
+Exec=/usr/bin/brave-browser --app=https://www.youtube.com --class=youtube --user-data-dir=__HOME__/.config/brave-ytmusic
+Terminal=false
+Type=Application
+Icon=youtube
+StartupWMClass=youtube
+Categories=AudioVideo;Video;Player;
+Keywords=youtube;video;yt;
