@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=WhatsApp
+Comment=WhatsApp Web (standalone Brave app)
+Exec=/usr/bin/brave-browser --app=https://web.whatsapp.com --class=whatsapp --user-data-dir=__HOME__/.config/brave-whatsapp
+Terminal=false
+Type=Application
+Icon=brave-browser
+StartupWMClass=whatsapp
+Categories=Network;InstantMessaging;

@@ -35,10 +35,13 @@ link() {
 }
 
 # Render a config containing __HOME__ / __WALLPAPER__ placeholders, then link it.
+# Render a config containing placeholders, then link it into place.
+# The rendered copy mirrors the path under $HOME, so targets outside ~/.config
+# (e.g. ~/.local/share/applications) work too.
 render_link() {
     local src="$1" dst="$2"
-    mkdir -p "$RENDER_DIR/$(dirname "${dst#"$HOME"/.config/}")"
-    local out="$RENDER_DIR/${dst#"$HOME"/.config/}"
+    local rel="${dst#"$HOME"/}"
+    local out="$RENDER_DIR/$rel"
     mkdir -p "$(dirname "$out")"
     render_placeholders "$src" >"$out"
     link "$out" "$dst"
@@ -176,6 +179,14 @@ mkdir -p "$HOME/.local/bin"
 link "$DOTFILES_DIR/bin/openapi-checker.sh" "$HOME/.local/bin/openapi-checker.sh"
 link "$DOTFILES_DIR/bin/googleapicheck" "$HOME/.local/bin/googleapicheck"
 link "$DOTFILES_DIR/bin/basic-recon.sh" "$HOME/.local/bin/basic-recon.sh"
+
+# --- desktop entries ---------------------------------------------------
+# Web apps opened as their own Brave window. A dedicated --user-data-dir keeps
+# the login session separate per app and persists across restarts.
+echo "[desktop]"
+mkdir -p "$HOME/.local/share/applications"
+render_link "$DOTFILES_DIR/desktop/youtube-music.desktop" "$HOME/.local/share/applications/youtube-music.desktop"
+render_link "$DOTFILES_DIR/desktop/whatsapp-web.desktop" "$HOME/.local/share/applications/whatsapp-web.desktop"
 
 # --- gtk ---------------------------------------------------------------
 
