@@ -25,12 +25,48 @@ else
     target="single"
 fi
 
+# --- adopt stray workspaces -------------------------------------------
+# When a monitor is unplugged Hyprland migrates its workspaces (B1, C2, ...)
+# to the screen that is left, keeping the dead prefix, so the bar ends up with
+# an unordered mix like A1, B2, A4. Move those windows onto the same number
+# under the live monitor's prefix; their empty workspaces then disappear.
+LIVE_MONITOR=$(hyprctl monitors -j | jq -r '.[0].name' 2>/dev/null)
+case "$LIVE_MONITOR" in
+    eDP*) LIVE_PREFIX=A ;;
+    HDMI*) LIVE_PREFIX=B ;;
+    DP*) LIVE_PREFIX=C ;;
+    *) LIVE_PREFIX=A ;;
+esac
+
+hyprctl clients -j 2>/dev/null | jq -r --arg live "$LIVE_PREFIX" \
+    '.[] | select(.workspace.name | test("^" + $live) | not)
+         | select(.workspace.name | test("^[ABC][0-9]+$"))
+         | .address + " " + .workspace.name' \
+| while read -r addr dead; do
+    n=$(printf '%s' "$dead" | tr -cd '[:digit:]')
+    [ -n "$n" ] || n=1
+    hyprctl dispatch movetoworkspacesilent "name:${LIVE_PREFIX}${n},address:$addr" >/dev/null 2>&1
+done
+
 prev=$(cat "$STATE_FILE" 2>/dev/null || echo "")
 if [ "$prev" = "$target" ] && [ "$1" != "--force" ]; then
     exit 0
 fi
 
 echo "$target" > "$STATE_FILE"
+
+# Waybar's configs contain __HOME__ placeholders, so point at the rendered
+# copies install.sh produces (~/.config/dotfiles-rendered/waybar), never at the
+# raw repo file: the raw one still has __HOME__ and every path in it breaks.
+RENDERED_WAYBAR="$HOME/.config/dotfiles-rendered/waybar"
+
+if [ "$target" = "triple" ]; then
+    ln -sfn "$DOTFILES_DIR/hypr/monitors-triple.conf" "$HYPR_DIR/monitors.conf"
+    ln -sfn "$RENDERED_WAYBAR/config-triple" "$WAYBAR_DIR/config"
+else
+    ln -sfn "$DOTFILES_DIR/hypr/monitors-single.conf" "$HYPR_DIR/monitors.conf"
+    ln -sfn "$RENDERED_WAYBAR/config-single" "$WAYBAR_DIR/config"
+fi
 
 # Waybar's configs contain __HOME__ placeholders, so point at the rendered
 # copies install.sh produces (~/.config/dotfiles-rendered/waybar), never at the
