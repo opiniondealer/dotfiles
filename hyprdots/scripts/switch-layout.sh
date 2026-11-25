@@ -16,14 +16,14 @@ STATE_FILE="/tmp/hypr-layout-mode"
 HYPRSIG="${HYPRLAND_INSTANCE_SIGNATURE:-$(ls -t /run/user/$(id -u)/hypr/ 2>/dev/null | head -1)}"
 export HYPRLAND_INSTANCE_SIGNATURE="$HYPRSIG"
 
-# Hitung monitor aktif
-count=$(hyprctl -j monitors 2>/dev/null | jq 'length' 2>/dev/null || echo 1)
+# Count EXTERNAL monitors (eDP-1 is always present on this laptop).
+count=$(hyprctl -j monitors 2>/dev/null | jq '[.[] | select(.name != "eDP-1")] | length' 2>/dev/null || echo 0)
 
-if [ "$count" -ge 2 ]; then
-    target="triple"
-else
-    target="single"
-fi
+case "$count" in
+    0) target="single" ;;
+    1) target="dual" ;;
+    *) target="triple" ;;
+esac
 
 # --- adopt stray workspaces -------------------------------------------
 # When a monitor is unplugged Hyprland migrates its workspaces (B1, C2, ...)
@@ -60,26 +60,34 @@ echo "$target" > "$STATE_FILE"
 # raw repo file: the raw one still has __HOME__ and every path in it breaks.
 RENDERED_WAYBAR="$HOME/.config/dotfiles-rendered/waybar"
 
-if [ "$target" = "triple" ]; then
-    ln -sfn "$DOTFILES_DIR/hypr/monitors-triple.conf" "$HYPR_DIR/monitors.conf"
-    ln -sfn "$RENDERED_WAYBAR/config-triple" "$WAYBAR_DIR/config"
-else
-    ln -sfn "$DOTFILES_DIR/hypr/monitors-single.conf" "$HYPR_DIR/monitors.conf"
-    ln -sfn "$RENDERED_WAYBAR/config-single" "$WAYBAR_DIR/config"
-fi
+case "$target" in
+    triple)
+        ln -sfn "$DOTFILES_DIR/hypr/monitors-triple.conf" "$HYPR_DIR/monitors.conf"
+        ln -sfn "$RENDERED_WAYBAR/config-triple" "$WAYBAR_DIR/config" ;;
+    dual)
+        ln -sfn "$DOTFILES_DIR/hypr/monitors-dual.conf" "$HYPR_DIR/monitors.conf"
+        ln -sfn "$RENDERED_WAYBAR/config-triple" "$WAYBAR_DIR/config" ;;
+    *)
+        ln -sfn "$DOTFILES_DIR/hypr/monitors-single.conf" "$HYPR_DIR/monitors.conf"
+        ln -sfn "$RENDERED_WAYBAR/config-single" "$WAYBAR_DIR/config" ;;
+esac
 
 # Waybar's configs contain __HOME__ placeholders, so point at the rendered
 # copies install.sh produces (~/.config/dotfiles-rendered/waybar), never at the
 # raw repo file: the raw one still has __HOME__ and every path in it breaks.
 RENDERED_WAYBAR="$HOME/.config/dotfiles-rendered/waybar"
 
-if [ "$target" = "triple" ]; then
-    ln -sfn "$DOTFILES_DIR/hypr/monitors-triple.conf" "$HYPR_DIR/monitors.conf"
-    ln -sfn "$RENDERED_WAYBAR/config-triple" "$WAYBAR_DIR/config"
-else
-    ln -sfn "$DOTFILES_DIR/hypr/monitors-single.conf" "$HYPR_DIR/monitors.conf"
-    ln -sfn "$RENDERED_WAYBAR/config-single" "$WAYBAR_DIR/config"
-fi
+case "$target" in
+    triple)
+        ln -sfn "$DOTFILES_DIR/hypr/monitors-triple.conf" "$HYPR_DIR/monitors.conf"
+        ln -sfn "$RENDERED_WAYBAR/config-triple" "$WAYBAR_DIR/config" ;;
+    dual)
+        ln -sfn "$DOTFILES_DIR/hypr/monitors-dual.conf" "$HYPR_DIR/monitors.conf"
+        ln -sfn "$RENDERED_WAYBAR/config-triple" "$WAYBAR_DIR/config" ;;
+    *)
+        ln -sfn "$DOTFILES_DIR/hypr/monitors-single.conf" "$HYPR_DIR/monitors.conf"
+        ln -sfn "$RENDERED_WAYBAR/config-single" "$WAYBAR_DIR/config" ;;
+esac
 
 # Reload Hyprland config
 hyprctl reload >/dev/null 2>&1
